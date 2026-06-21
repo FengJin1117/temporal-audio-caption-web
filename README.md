@@ -9,4 +9,4 @@ The site is a standalone static page published with GitHub Pages.
 - `plan/`: demo validation plan
 - `benchmark/`: benchmark analysis
 - `baseline/`: baseline results and inference examples
-- `grpo/`: GRPO evaluation results
+- `grpo/`: GRPO evaluation results and representative examples

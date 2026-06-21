@@ -9,7 +9,12 @@
     * { box-sizing:border-box; }
     body { min-height:100vh; margin:0; display:grid; place-items:center; padding:32px 20px; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
     main { width:min(900px,100%); }
-    h1 { margin:0 0 34px; text-align:center; font-size:clamp(2rem,6vw,3.6rem); line-height:1.1; letter-spacing:-.045em; }
+    h1 { margin:0 0 26px; text-align:center; font-size:clamp(2rem,6vw,3.6rem); line-height:1.1; letter-spacing:-.045em; }
+    .announcement { display:flex; align-items:center; gap:14px; margin:0 0 20px; padding:15px 18px; border:1px solid #a9d5c0; border-radius:16px; background:#f0fbf5; color:#125a3c; font-weight:750; text-decoration:none; box-shadow:0 8px 24px rgba(18,90,60,.07); }
+    .announcement:hover { border-color:#65b78e; transform:translateY(-1px); transition:.18s ease; }
+    .announcement-icon { flex:none; font-size:1.45rem; }
+    .announcement-text { flex:1; }
+    .announcement-arrow { flex:none; font-size:1.25rem; }
     nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
     .nav-card { min-height:150px; padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--card); box-shadow:0 10px 30px rgba(23,32,51,.06); }
     .nav-card > a, .nav-title { color:var(--ink); font-size:1.3rem; font-weight:750; text-decoration:none; }
@@ -20,12 +25,17 @@
     .subnav { display:flex; flex-wrap:wrap; gap:10px; }
     .subnav a { padding:9px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:700; text-decoration:none; }
     a:focus-visible { outline:3px solid #7ac0d3; outline-offset:4px; }
-    @media (max-width:640px) { body { place-items:start center; padding-top:56px; } h1 { margin-bottom:26px; } nav { grid-template-columns:1fr; } .nav-card { min-height:112px; } }
+    @media (max-width:640px) { body { place-items:start center; padding-top:48px; } h1 { margin-bottom:22px; } .announcement { align-items:flex-start; } nav { grid-template-columns:1fr; } .nav-card { min-height:112px; } }
   </style>
 </head>
 <body>
 <main>
   <h1>Temporal Audio Caption</h1>
+  <a class="announcement" href="grpo/representative_examples.html">
+    <span class="announcement-icon" aria-hidden="true">🎉📢</span>
+    <span class="announcement-text">GRPO 提升 dialogue-centric speech caption：代表性样例展示</span>
+    <span class="announcement-arrow" aria-hidden="true">→</span>
+  </a>
   <nav aria-label="项目导航">
     <section class="nav-card"><a href="plan/index.html">Plan（Demo 验证计划）</a></section>
     <section class="nav-card"><a href="benchmark/benchmark_analysis.html">Benchmark</a></section>
@@ -36,7 +46,13 @@
         <a href="baseline/raw_outputs.html">Examples</a>
       </div>
     </section>
-    <section class="nav-card"><a href="grpo/RESULTS.html">GRPO</a></section>
+    <section class="nav-card">
+      <span class="nav-title">GRPO</span>
+      <div class="subnav">
+        <a href="grpo/RESULTS.html">成绩</a>
+        <a href="grpo/representative_examples.html">Examples</a>
+      </div>
+    </section>
   </nav>
 </main>
 </body>
