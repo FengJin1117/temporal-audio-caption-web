@@ -3,376 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>时序化 GRPO Demo 计划 v1</title>
+  <title>Temporal Audio Caption</title>
   <style>
-    :root { --ink:#18212f; --muted:#5d6878; --line:#d9e2ee; --bg:#f6f8fb; --card:#fff; --accent:#0f766e; --accent2:#1d4ed8; --warn:#b45309; }
+    :root { --ink:#172033; --muted:#667085; --line:#dce4ed; --bg:#f4f7fa; --card:#fff; --accent:#176b87; --accent-soft:#e7f3f6; }
     * { box-sizing:border-box; }
-    body { margin:0; font-family:Arial, "Microsoft YaHei", sans-serif; color:var(--ink); background:var(--bg); line-height:1.65; }
-    main { max-width:1120px; margin:0 auto; padding:34px 22px 56px; }
-    header { padding:30px 32px; border-radius:8px; color:white; background:linear-gradient(135deg,#0f766e,#1d4ed8); }
-    h1 { margin:0 0 8px; font-size:30px; }
-    h2 { margin:32px 0 12px; padding-left:10px; border-left:5px solid var(--accent); font-size:22px; }
-    h3 { margin:24px 0 8px; color:#243244; font-size:18px; }
-    p { margin:10px 0; }
-    code { font-family:Consolas, "Courier New", monospace; background:#eef3f8; padding:1px 5px; border-radius:4px; }
-    pre { overflow:auto; padding:14px 16px; border-radius:8px; border:1px solid var(--line); background:#101827; color:#eaf2ff; }
-    pre code { background:transparent; color:inherit; padding:0; }
-    table { width:100%; border-collapse:collapse; margin:12px 0 18px; background:var(--card); border:1px solid var(--line); }
-    th, td { border:1px solid var(--line); padding:10px; vertical-align:top; text-align:left; font-size:14px; }
-    th { background:#eaf1f8; font-weight:700; }
-    ul, ol { padding-left:24px; }
-    section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:4px 22px 16px; margin-top:18px; }
-    .lead { max-width:880px; color:#e6fffb; margin:0; }
-    .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
-    .chip { padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.18); color:white; font-size:13px; }
-    .note { padding:14px 16px; border-radius:8px; background:#ecfdf5; border:1px solid #a7f3d0; }
-    .warn { padding:14px 16px; border-radius:8px; background:#fff7ed; border:1px solid #fed7aa; }
-    .two-col { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
-    .card { border:1px solid var(--line); border-radius:8px; padding:14px 16px; background:#fbfdff; }
-    .muted { color:var(--muted); }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:32px 20px; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(900px,100%); }
+    h1 { margin:0 0 34px; text-align:center; font-size:clamp(2rem,6vw,3.6rem); line-height:1.1; letter-spacing:-.045em; }
+    nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .nav-card { min-height:150px; padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--card); box-shadow:0 10px 30px rgba(23,32,51,.06); }
+    .nav-card > a, .nav-title { color:var(--ink); font-size:1.3rem; font-weight:750; text-decoration:none; }
+    .nav-card > a { height:100%; display:flex; align-items:center; justify-content:space-between; }
+    .nav-card > a::after { content:"→"; color:var(--accent); }
+    .nav-card:has(> a):hover { border-color:#9fc6d2; transform:translateY(-2px); transition:.18s ease; }
+    .nav-title { display:block; margin-bottom:18px; }
+    .subnav { display:flex; flex-wrap:wrap; gap:10px; }
+    .subnav a { padding:9px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:700; text-decoration:none; }
+    a:focus-visible { outline:3px solid #7ac0d3; outline-offset:4px; }
+    @media (max-width:640px) { body { place-items:start center; padding-top:56px; } h1 { margin-bottom:26px; } nav { grid-template-columns:1fr; } .nav-card { min-height:112px; } }
   </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>时序化 GRPO Demo 计划 v1</h1>
-    <p class="lead">一个“小而精、快准狠”的 dialogue speech temporal caption demo：用 D-ORCA 的 who / what / when 拆解，暴露并修复 Qwen2.5-Omni 的时序化 caption 问题。</p>
-    <div class="chips">
-      <span class="chip">Qwen2.5-Omni</span>
-      <span class="chip">Dialogue Speech</span>
-      <span class="chip">GRPO</span>
-      <span class="chip">Speaker / Content / Time Reward</span>
-      <span class="chip">1000 条精选数据</span>
-    </div>
-  </header>
-
-  <section>
-    <h2>1. Demo 定位</h2>
-    <p>本 demo 不追求大而全，目标是用最小数据和最直接 reward 暴露并修复 Qwen2.5-Omni 在 dialogue speech caption 中的 temporal caption 问题。</p>
-    <p>核心任务从泛化 audio caption 收窄为：</p>
-    <pre><code>输入一段含多轮对话的音频，输出句子级 temporal dialogue caption：
-[start, end] speaker: transcript / concise utterance</code></pre>
-    <p>这里借鉴 D-ORCA 的拆解：</p>
-    <pre><code>Dialogue temporal caption = who + what + when</code></pre>
-    <ul>
-      <li><b>who：</b>谁说的，或至少 speaker turn 是否区分正确。</li>
-      <li><b>what：</b>说了什么，转写/语义是否准确。</li>
-      <li><b>when：</b>每句话或每个 speaker turn 的时间边界是否对齐。</li>
-    </ul>
-    <p class="note">本 demo 的论文价值在于证明：对 dialogue speech 场景，时序化 caption 可以通过结构化输出和可验证 reward 被 GRPO 快速改善。</p>
-  </section>
-
-  <section>
-    <h2>2. 输出格式</h2>
-    <p>统一要求模型输出结构化 caption，便于 reward 解析。</p>
-    <pre><code>&lt;answer&gt;
-[00.00-02.10] Speaker 1: ...
-[02.10-04.80] Speaker 2: ...
-[04.80-07.20] Speaker 1: ...
-&lt;/answer&gt;</code></pre>
-    <p>可选增强版：</p>
-    <pre><code>&lt;think&gt;
-#Turn 1: speaker=Speaker 1; time=[00.00,02.10]; content="..."
-#Turn 2: speaker=Speaker 2; time=[02.10,04.80]; content="..."
-&lt;/think&gt;
-&lt;answer&gt;
-[00.00-02.10] Speaker 1: ...
-[02.10-04.80] Speaker 2: ...
-&lt;/answer&gt;</code></pre>
-    <p>demo v1 建议先只强制 <code>&lt;answer&gt;</code>，避免模型被复杂格式拖垮。后续若 reward 解析不稳，再加入 <code>&lt;think&gt;</code>。</p>
-  </section>
-
-  <section>
-    <h2>3. 评测协议</h2>
-    <h3>3.1 评测目标</h3>
-    <p>评测必须能暴露 Qwen2.5-Omni 的具体问题，而不是只给一个笼统 caption 分数。</p>
-    <ul>
-      <li>speaker turn 漏掉或合并。</li>
-      <li>speaker attribution 错误。</li>
-      <li>transcript 只给摘要、不保留具体话语。</li>
-      <li>timestamp 缺失、顺序错乱、边界偏移。</li>
-    </ul>
-
-    <h3>3.2 主评测集</h3>
-    <p>构造一个小型 <code>Dialogue-TCap-Bench</code>：</p>
-    <ul>
-      <li>规模：100 条音频。</li>
-      <li>语言：优先英文 60 条，中文 40 条；如果中文处理成本高，v1 可先全英文。</li>
-      <li>时长：8-30 秒。</li>
-      <li>每条包含 2-6 个 speaker turns。</li>
-      <li>场景：访谈、影视对白、播客片段、客服/会议、双人问答。</li>
-      <li>标注字段：audio_path、turn_id、start、end、speaker_id、transcript。</li>
-    </ul>
-    <p>优先选择 speaker turn 清晰、背景噪声不过强、没有大量重叠说话的样本。demo v1 不把 overlapped speech 作为重点。</p>
-
-    <h3>3.3 指标</h3>
-    <p>参考 D-ORCA 的 DVD-Bench，采用三主指标：</p>
-    <table>
-      <thead><tr><th>指标</th><th>计算方式</th><th>目的</th></tr></thead>
-      <tbody>
-        <tr><td>Speaker Acc</td><td>匹配后的 turn 中 speaker_id 正确比例</td><td>衡量 who</td></tr>
-        <tr><td>WER / CER</td><td>将预测 transcript 与 GT transcript 对齐后计算</td><td>衡量 what</td></tr>
-        <tr><td>Temporal IoU</td><td>预测 turn 时间段与 GT turn 时间段的平均 IoU</td><td>衡量 when</td></tr>
-      </tbody>
-    </table>
-    <p>补充指标：</p>
-    <table>
-      <thead><tr><th>指标</th><th>计算方式</th><th>目的</th></tr></thead>
-      <tbody>
-        <tr><td>Turn F1</td><td>预测 turn 与 GT turn 按时间 IoU + 文本相似度匹配后算 F1</td><td>衡量是否漏 turn / 多 turn</td></tr>
-        <tr><td>Order Acc</td><td>匹配 turn 的顺序是否保持一致</td><td>暴露 temporal ordering 错误</td></tr>
-        <tr><td>Format Pass Rate</td><td>是否可解析成 <code>[start-end] speaker: text</code></td><td>保证 reward 可计算</td></tr>
-        <tr><td>Length / Repetition Rate</td><td>输出是否过长、重复 speaker 或重复句子</td><td>防止 GRPO reward hacking</td></tr>
-      </tbody>
-    </table>
-
-    <h3>3.4 匹配规则</h3>
-    <p>预测 turn 与 GT turn 做 bipartite matching。匹配分数：</p>
-    <pre><code>match_score = 0.5 * temporal_iou + 0.5 * text_similarity</code></pre>
-    <ul>
-      <li>temporal_iou：预测 <code>[start,end]</code> 与 GT <code>[start,end]</code> 的 IoU。</li>
-      <li>text_similarity：v1 用 <code>1 - normalized WER</code>；后续可替换为 embedding similarity。</li>
-    </ul>
-    <p>仅当 <code>match_score &gt;= 0.3</code> 才视为有效匹配。</p>
-  </section>
-
-  <section>
-    <h2>4. 数据制造计划</h2>
-    <h3>4.1 训练数据规模</h3>
-    <p>GRPO 训练只做高质量 1000 条。</p>
-    <table>
-      <thead><tr><th>split</th><th>数量</th><th>用途</th></tr></thead>
-      <tbody>
-        <tr><td>train</td><td>1000</td><td>GRPO</td></tr>
-        <tr><td>valid</td><td>100</td><td>reward sanity check</td></tr>
-        <tr><td>test</td><td>100</td><td>Dialogue-TCap-Bench</td></tr>
-      </tbody>
-    </table>
-    <p>训练数据不追求覆盖所有音频场景，只服务于 dialogue temporal caption 行为塑形。</p>
-
-    <h3>4.2 数据源优先级</h3>
-    <div class="two-col">
-      <div class="card">
-        <h3>优先级 A：真实 speech/dialogue</h3>
-        <ul>
-          <li>YouTube / podcast / interview clip：可用 WhisperX 或强制对齐生成句子级时间戳。</li>
-          <li>Movie / TV dialogue clips：适合 speaker attribution，但版权和角色标注成本较高。</li>
-          <li>Call / meeting / conversation datasets：适合 speaker turn 和 diarization。</li>
-          <li>D-ORCA / DVD-Bench 思路：若官方数据释放，可借鉴其 <code>speaker + transcript + timestamp</code> 格式；若未释放，只借鉴评测协议。</li>
-        </ul>
+  <h1>Temporal Audio Caption</h1>
+  <nav aria-label="项目导航">
+    <section class="nav-card"><a href="plan/index.html">Plan（Demo 验证计划）</a></section>
+    <section class="nav-card"><a href="benchmark/benchmark_analysis.html">Benchmark</a></section>
+    <section class="nav-card">
+      <span class="nav-title">Baseline</span>
+      <div class="subnav">
+        <a href="baseline/RESULTS.html">成绩</a>
+        <a href="baseline/raw_outputs.html">Examples</a>
       </div>
-      <div class="card">
-        <h3>优先级 B：合成双人对话</h3>
-        <ul>
-          <li>从公开文本对话生成 2-6 轮 script。</li>
-          <li>用 TTS 生成 Speaker 1 / Speaker 2 两种音色。</li>
-          <li>按脚本合成不同间隔、停顿、轻微重叠。</li>
-          <li>自动保存每句 start/end/speaker/transcript。</li>
-        </ul>
-      </div>
-    </div>
-    <p>demo v1 推荐以 B 为主、A 为辅：</p>
-    <pre><code>700 条 TTS 合成双人对话
-300 条真实 speech/dialogue 片段</code></pre>
-    <p>原因：TTS 数据时间戳干净，reward 稳；真实数据用于防止模型只适应合成音色。</p>
-
-    <h3>4.3 样本筛选</h3>
-    <p>对候选样本先跑 Qwen2.5-Omni baseline，保留“可学习但没完全学会”的样本。</p>
-    <pre><code>Format Pass = true
-0.2 &lt;= Speaker Acc &lt;= 0.9
-0.2 &lt;= 1-WER &lt;= 0.9
-0.1 &lt;= Temporal IoU &lt;= 0.8
-turn_count in [2, 6]
-duration in [8s, 30s]</code></pre>
-    <p>丢弃条件：</p>
-    <ul>
-      <li>baseline 完全不会输出可解析格式。</li>
-      <li>单人独白，无 speaker turn。</li>
-      <li>大量重叠说话，连人工也难对齐。</li>
-      <li>transcript 过长，导致 Qwen 输出超长或重复。</li>
-      <li>音频质量过差，ASR 本身不可靠。</li>
-    </ul>
-
-    <h3>4.4 数据字段</h3>
-    <pre><code>{
-  "id": "demo_000001",
-  "audio_path": "...wav",
-  "duration": 18.4,
-  "language": "en",
-  "turns": [
-    {
-      "turn_id": 1,
-      "speaker": "Speaker 1",
-      "start": 0.24,
-      "end": 2.10,
-      "text": "..."
-    }
-  ],
-  "prompt": "Generate a timestamped dialogue caption..."
-}</code></pre>
-    <p>speaker v1 不要求真实姓名，只要求 <code>Speaker 1 / Speaker 2</code> 一致。若使用影视或访谈数据，可额外保留 <code>speaker_name</code>，但 reward 先按匿名 speaker 计算。</p>
-  </section>
-
-  <section>
-    <h2>5. Reward 设计</h2>
-    <h3>5.1 总 reward</h3>
-    <p>借鉴 D-ORCA，reward 分成 who / what / when。</p>
-    <pre><code>R = 0.15 * R_format
-  + 0.35 * R_speaker
-  + 0.30 * R_content
-  + 0.20 * R_time</code></pre>
-    <p>如果发现 timestamp reward 过早导致 collapse，使用 curriculum。</p>
-
-    <h3>5.2 Format Reward</h3>
-    <p>检查每行是否满足：</p>
-    <pre><code>[start-end] Speaker k: text</code></pre>
-    <ul>
-      <li>有 <code>&lt;answer&gt;</code>：+0.2。</li>
-      <li>每行可解析 timestamp：+0.3。</li>
-      <li>每行可解析 speaker：+0.2。</li>
-      <li>每行有非空 text：+0.2。</li>
-      <li>时间单调递增：+0.1。</li>
-    </ul>
-    <p>若输出超过最大长度、重复率过高或无法解析：</p>
-    <pre><code>R_total = 0</code></pre>
-
-    <h3>5.3 Speaker Reward</h3>
-    <p>预测 turn 与 GT turn 匹配后计算 speaker 是否一致。</p>
-    <pre><code>R_speaker = correct_speaker_count / matched_turn_count</code></pre>
-    <p>如果使用匿名 speaker，需要先做 speaker permutation 对齐：</p>
-    <pre><code>预测 Speaker 1 可以映射到 GT Speaker A 或 B，取全局最优映射。</code></pre>
-
-    <h3>5.4 Content Reward</h3>
-    <p>对匹配 turn 的文本计算 WER/CER。</p>
-    <pre><code>英文：R_content = max(0, 1 - WER)
-中文：R_content = max(0, 1 - CER)</code></pre>
-    <p>v1 可以把所有 matched turn 文本拼接后算一次 WER，稳定性更高；后续再改成 turn-level 平均。</p>
-
-    <h3>5.5 Time Reward</h3>
-    <p>对匹配 turn 计算 temporal IoU。</p>
-    <pre><code>R_time = mean(IoU(pred_turn_i, gt_turn_j))</code></pre>
-    <p>额外加入顺序惩罚：</p>
-    <pre><code>若预测时间不单调或 turn 顺序反转，R_time *= 0.5</code></pre>
-
-    <h3>5.6 Curriculum</h3>
-    <p>D-ORCA 的经验是：从一开始加入 time reward 可能导致训练崩溃。因此 demo v1 采用两阶段。</p>
-    <table>
-      <thead><tr><th>阶段</th><th>步数</th><th>reward</th></tr></thead>
-      <tbody>
-        <tr><td>阶段 1</td><td>前 30% step</td><td><code>0.20 R_format + 0.45 R_speaker + 0.35 R_content</code></td></tr>
-        <tr><td>阶段 2</td><td>后 70% step</td><td><code>0.15 R_format + 0.35 R_speaker + 0.30 R_content + 0.20 R_time</code></td></tr>
-      </tbody>
-    </table>
-    <p>如果 baseline 本身时间戳很差，可以先让模型输出离散时间：<code>beginning / middle / end</code>。但 demo v1 优先尝试秒级 timestamp，因为 dialogue turn 的边界比泛声事件更容易标注。</p>
-  </section>
-
-  <section>
-    <h2>6. GRPO 训练设置</h2>
-    <h3>6.1 基模</h3>
-    <p>主实验：<code>Qwen2.5-Omni</code></p>
-    <p>可选对照：<code>Qwen3-Omni-30B-A3B</code>、<code>Audio-Flamingo-Next</code>。demo v1 不建议引入多基模，先把 Qwen2.5-Omni 的问题打穿。</p>
-
-    <h3>6.2 Prompt</h3>
-    <pre><code>You are given an audio clip containing a short dialogue.
-Generate a timestamped dialogue caption.
-Use one line per speaker turn.
-Each line must follow:
-[start-end] Speaker k: spoken content
-Do not summarize. Do not add events that are not spoken.</code></pre>
-    <p>中文样本可追加：</p>
-    <pre><code>If the speech is Chinese, transcribe it in Chinese.</code></pre>
-
-    <h3>6.3 Sampling</h3>
-    <p>每个样本采样 4-8 个 responses，用 GRPO 相对 reward 更新。</p>
-    <ul>
-      <li>group size：4 起步；显存允许再到 8。</li>
-      <li>max output length：严格限制，防重复。</li>
-      <li>temperature：0.7-1.0。</li>
-      <li>保留 format invalid 样本，但 reward 置低，帮助模型学格式。</li>
-    </ul>
-
-    <h3>6.4 Baseline / Ablation</h3>
-    <table>
-      <thead><tr><th>实验</th><th>目的</th></tr></thead>
-      <tbody>
-        <tr><td>Base Qwen2.5-Omni</td><td>暴露问题</td></tr>
-        <tr><td>SFT small 1k</td><td>判断纯模仿是否足够</td></tr>
-        <tr><td>GRPO without time reward</td><td>验证 who/what 改善</td></tr>
-        <tr><td>GRPO full curriculum</td><td>验证 when 加入后的提升</td></tr>
-      </tbody>
-    </table>
-    <p>如果时间紧，demo 最小版只做：</p>
-    <pre><code>Base vs GRPO full curriculum</code></pre>
-  </section>
-
-  <section>
-    <h2>7. Demo 成功标准</h2>
-    <p>在 100 条 Dialogue-TCap-Bench 上，希望看到：</p>
-    <table>
-      <thead><tr><th>指标</th><th>目标</th></tr></thead>
-      <tbody>
-        <tr><td>Format Pass Rate</td><td>提升到 90%+</td></tr>
-        <tr><td>Speaker Acc</td><td>相对提升 5-10 points</td></tr>
-        <tr><td>WER/CER</td><td>相对下降 10-20%</td></tr>
-        <tr><td>Temporal IoU</td><td>相对提升 10 points 以上</td></tr>
-        <tr><td>Turn F1</td><td>明显提升，尤其是少合并 turn</td></tr>
-        <tr><td>Repetition Rate</td><td>不上升，最好下降</td></tr>
-      </tbody>
-    </table>
-    <div class="warn">
-      <p>如果 Temporal IoU 提升但 WER 变差，说明 time reward 过强。</p>
-      <p>如果 WER 提升但 speaker/time 不变，说明模型只学会 ASR，没有学会 temporal caption。</p>
-      <p>如果输出变长、重复、塞满 timestamp，说明需要更强 length/repetition penalty。</p>
-    </div>
-  </section>
-
-  <section>
-    <h2>8. Demo 执行顺序</h2>
-    <table>
-      <thead><tr><th>步骤</th><th>动作</th><th>产物/检查</th></tr></thead>
-      <tbody>
-        <tr><td>Step 1</td><td>造 100 条 Dialogue-TCap-Bench，覆盖 2/3/4+ turn，并人工快速检查 GT。</td><td><code>data/dialogue_tcap_bench.json</code></td></tr>
-        <tr><td>Step 2</td><td>跑 Qwen2.5-Omni baseline，统一 prompt 生成 caption。</td><td>错误分析表：format、speaker、content、time、turn_merge、hallucination。</td></tr>
-        <tr><td>Step 3</td><td>造 1000 条训练集，优先 TTS 合成 + 少量真实数据。</td><td>保留 audio、turn-level transcript、speaker、start/end、prompt。</td></tr>
-        <tr><td>Step 4</td><td>reward dry run，不训练，先对 baseline outputs 打分。</td><td>检查 reward 是否区分好坏、是否符合人工判断、是否可 hack。</td></tr>
-        <tr><td>Step 5</td><td>GRPO 训练，先 smoke test，再跑完整 1000 条。</td><td>监控 mean reward、format pass、output length、repetition rate、三项 reward 曲线。</td></tr>
-        <tr><td>Step 6</td><td>评测与 case study。</td><td>Base vs GRPO 指标表 + 5-10 个 qualitative examples。</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section>
-    <h2>9. 风险与规避</h2>
-    <table>
-      <thead><tr><th>风险</th><th>表现</th><th>规避</th></tr></thead>
-      <tbody>
-        <tr><td>time reward 太难</td><td>训练 collapse，timestamp 乱编</td><td>curriculum；先 who/what 后 when</td></tr>
-        <tr><td>模型输出重复</td><td>speaker/text 重复刷分</td><td>max length；重复率惩罚；必要时 pre-DPO</td></tr>
-        <tr><td>speaker 匿名对齐不稳</td><td>Speaker 1/2 交换导致误罚</td><td>做全局 speaker permutation matching</td></tr>
-        <tr><td>TTS 数据过拟合</td><td>真实音频无提升</td><td>至少混入 300 条真实 dialogue</td></tr>
-        <tr><td>WER reward 压制 caption 能力</td><td>模型只做 ASR，不组织 caption</td><td>保持行级 speaker/time 格式 reward</td></tr>
-        <tr><td>重叠说话太难</td><td>IoU 和 WER 都不稳定</td><td>v1 丢弃 overlapped speech，v2 再加入</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section>
-    <h2>10. 最小可交付结果</h2>
-    <ol>
-      <li>一个 100 条的 Dialogue-TCap-Bench。</li>
-      <li>一个 1000 条的 GRPO training set。</li>
-      <li>一套 who / what / when reward。</li>
-      <li>Base Qwen2.5-Omni 与 GRPO 模型的指标对比。</li>
-      <li>5-10 个能直观看出 temporal caption 改善的 case。</li>
-    </ol>
-    <p>论文叙事可以写成：</p>
-    <pre><code>我们发现通用 omni model 在 dialogue speech caption 中并非完全听不懂，
-而是无法稳定组织 speaker、content 与 timestamp。
-因此我们借鉴 D-ORCA，将 temporal caption 拆成 who/what/when 三个可验证目标，
-用小规模精选数据和 curriculum GRPO 快速塑形模型的时序化 caption 行为。</code></pre>
-  </section>
-
-  <p class="muted">Source: plan/demo_plan_v1.md</p>
+    </section>
+    <section class="nav-card"><a href="grpo/RESULTS.html">GRPO</a></section>
+  </nav>
 </main>
 </body>
 </html>

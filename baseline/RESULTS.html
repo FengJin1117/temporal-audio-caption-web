@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qwen2.5-Omni-7B HarperValley Baseline</title>
+<style>
+:root { color-scheme: light; --ink:#18212f; --muted:#5f6b7a; --line:#dce3ea; --panel:#f6f8fb; --accent:#3157d5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#eef2f6; color:var(--ink); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { width:min(1040px,calc(100% - 32px)); margin:32px auto; padding:48px 56px 64px; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 12px 35px rgba(31,45,61,.08); }
+h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em; }
+h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
+h3 { margin:30px 0 10px; font-size:1.08rem; }
+p { margin:12px 0; }
+h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
+ul { margin:12px 0; padding-left:1.4rem; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:16px 0 22px; border:1px solid var(--line); border-radius:10px; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; }
+th { background:var(--panel); color:var(--muted); font-size:.82rem; letter-spacing:.04em; text-transform:uppercase; }
+td:last-child,th:last-child { text-align:right; }
+tbody tr:last-child td { border-bottom:0; }
+code { padding:.12em .35em; border-radius:5px; background:#eef1f5; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+pre { overflow:auto; margin:14px 0 22px; padding:18px; border:1px solid #293443; border-radius:10px; background:#111827; color:#e5edf6; line-height:1.5; }
+pre code { padding:0; background:none; color:inherit; white-space:pre-wrap; overflow-wrap:anywhere; }
+strong { font-weight:700; }
+.home-link { display:inline-flex; margin-bottom:20px; color:var(--accent); font-weight:700; text-decoration:none; }
+.home-link:hover { text-decoration:underline; }
+@media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
+@media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
+</style>
+</head>
+<body><main>
+<a class="home-link" href="../index.html">← 返回首页</a>
+<h1>Qwen2.5-Omni-7B HarperValley Baseline</h1>
+<h2>Result</h2>
+<p><strong>Custom overall score: 61.14/100</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody><tr><td>Format Pass Rate</td><td>0.8300</td></tr><tr><td>Turn Precision</td><td>0.6244</td></tr><tr><td>Turn Recall</td><td>0.6275</td></tr><tr><td>Turn F1</td><td>0.6259</td></tr><tr><td>Speaker Accuracy</td><td>0.8685</td></tr><tr><td>WER</td><td>0.1975</td></tr><tr><td>Temporal IoU</td><td>0.1488</td></tr><tr><td>Order Accuracy</td><td>0.9600</td></tr></tbody></table></div>
+<p>The custom score is <code>100 × mean(Turn F1, Speaker Accuracy, max(0, 1-WER), Temporal IoU)</code>; the native metric vector remains authoritative.</p>
+<h2>Reliability and generation diagnostics</h2>
+<ul><li>Raw caption parse failures: 17/100 (17.00%).</li><li>Inference failures: 0/100 (0.00%).</li><li><code>max_new_tokens=512</code> truncations (<code>finish_reason=length</code>): 8/100 (8.00%).</li><li>Captions with repeated 4-grams ratio ≥ 0.20: 8/100 (8.00%).</li><li>Repetition/truncation overlap: 8/8 repetition flags also hit the token limit.</li><li>Paralingual descriptions present: 421/421 (100.00%); HarperValley has no ground truth for their accuracy.</li><li>Completion tokens: median 199.5, P95 512, max 512.</li><li>Inference latency: median 5.18s/audio, total worker time 577.17s.</li></ul>
+<p>Temperature 0 is retained for a reproducible evaluation. Repetition is measured rather than hidden with sampling; a material repetition rate should be addressed with prompt/termination changes. For this prompt, 512 tokens is not sufficient: every high-repetition output reached the limit. Raising the cap alone may only extend the loop, so anti-repetition/termination behavior should be tested before increasing it.</p>
+<h2>Configuration</h2>
+<ul><li>Model: <code>Qwen/Qwen2.5-Omni-7B</code> via vLLM.</li><li>GPUs: two independent shards on physical GPUs 0 and 1.</li><li>Decoding: temperature 0, maximum 512 completion tokens, no retry or output repair.</li><li>Dataset: 100 HarperValley dialogue clips, evaluated with the benchmark's unchanged evaluator.</li></ul>
+<h2>Prompt</h2>
+<pre><code class="language-text">Listen carefully to the provided short dialogue and produce a complete temporal audio caption.
+
+Return only the following format and end immediately after &lt;/answer&gt;:
+&lt;answer&gt;
+[start-end] Speaker k: exact spoken content || A concise natural-language description of the audible voice, delivery, emotion, interaction, and relevant background sound.
+&lt;/answer&gt;
+
+Rules:
+- Use one chronological line per speaker turn. Times are seconds from the start of the clip with two decimal places.
+- Keep the same anonymous Speaker number for the same voice throughout the clip.
+- Transcribe what is actually spoken; do not summarize, paraphrase, invent words, or omit short turns.
+- After &quot; || &quot;, describe only audible evidence. Keep it concise but include salient vocal and paralinguistic detail such as tone, pace, hesitation, emphasis, emotion, voice quality, interaction, and background sound when present.
+- Do not force attributes that cannot be heard and do not guess identity, age, gender, accent, or setting.
+- A clearly audible non-speech event that matters may use Speaker label &quot;Sound Event&quot;.
+- Every line must contain the timestamp, speaker label, spoken content, and description separated by &quot; || &quot;.
+
+Perfect format example:
+&lt;answer&gt;
+[00.35-02.10] Speaker 1: Good morning, how can I help you? || A clear, calm voice opens politely at a moderate pace; the line is otherwise quiet.
+[02.42-04.85] Speaker 2: Hi, I&#x27;d like to check my account balance. || A second voice responds evenly, with a brief hesitation after the greeting and faint call-line noise underneath.
+[05.18-06.70] Speaker 1: Of course. || The first speaker answers promptly in a reassuring, professional tone.
+&lt;/answer&gt;</code></pre>
+<h2>Representative cases</h2>
+<h3>Parsed example: <code>hvb_0029</code></h3>
+<pre><code class="language-text">&lt;answer&gt;
+[00.00-02.62] Speaker 1: Main Street, Harper Valley, Oregon, two six nine seven six. || A clear, steady voice reads out an address and phone number.
+[02.62-03.00] Speaker 2: Yes. || A brief, neutral response.
+[03.00-04.00] Speaker 1: Is there anything else I can help you with? || The voice becomes slightly more inquisitive.
+[04.00-04.42] Speaker 2: No, that&#x27;s everything. || A brief, decisive response.
+[04.42-05.00] Speaker 1: Thank you for calling, have a great day. || The voice becomes more polite and appreciative.
+[05.00-05.42] Speaker 2: You too. Bye. || A neutral, brief response ends the call.
+&lt;/answer&gt;</code></pre>
+<h3>Parse failure: <code>hvb_0002</code></h3>
+<p>Errors: <code>[{"code": "invalid_timestamp", "line": 3}]</code></p>
+<h3>Truncated example: <code>hvb_0031</code></h3>
+<pre><code class="language-text">&lt;answer&gt;
+[00.00-01.00] Speaker 1: Parker || A clear, neutral tone, possibly in a professional setting.
+[01.00-02.00] Speaker 2: Mm-hmm, 555-123-4567 || A response with a slight pause, indicating thoughtfulness.
+[02.00-03.00] Speaker 1: 555-123-4567 || A confirmation with a neutral tone.
+[03.00-04.00] Speaker 2: Mm-hmm, 555-123-4567 || A second confirmation with a similar tone.
+[04.00-05.00] Speaker 1: 555-123-4567 || A third confirmation with a neutral tone.
+[05.00-06.00] Speaker 2: Mm-hmm, 555-123-4567 || A fourth confirmation with a similar tone.
+[06.00-07.00] Speaker 1: 555-123-4567 || A fifth confirmation with a neutral tone.
+[07.00-08.00] Speaker 2: Mm-hmm, 555-123-4567 || A sixth confirmation with a similar tone.
+[08.00-09.00] Speaker 1: 555-123-4567 || A seventh confirmation with a neutral tone.
+[09.00-10.00] Speaker 2: Mm-hmm, 555-123-4567 || An eighth confirmation with a similar tone.
+[10.00-11.00] Speaker 1: 555-123-4567 || A ninth confirmation with a neutral tone.
+[11.00-12.00] Speaker 2: Mm-hmm, 555-123-4567 || A tenth confirmation with a similar tone.
+[12.00-13.00] Speaker 1:</code></pre>
+<h2>Artifacts</h2>
+<p><code>RESULTS.html</code>, <code>raw_outputs.jsonl</code>, <code>parsed_outputs.jsonl</code>, <code>predictions.json</code>, <code>metrics.json</code>, <code>errors.jsonl</code>, <code>preparation_summary.json</code>, and <code>run_config.json</code> are stored beside this report.</p>
+</main></body>
+</html>
