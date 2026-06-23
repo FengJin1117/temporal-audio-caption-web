@@ -7,8 +7,10 @@
   <style>
     :root { --ink:#18212f; --muted:#5d6878; --line:#d9e2ee; --bg:#f6f8fb; --card:#fff; --accent:#0f766e; --accent2:#1d4ed8; --warn:#b45309; }
     * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
     body { margin:0; font-family:Arial, "Microsoft YaHei", sans-serif; color:var(--ink); background:var(--bg); line-height:1.65; }
-    main { max-width:1120px; margin:0 auto; padding:34px 22px 56px; }
+    .layout { display:grid; grid-template-columns:220px minmax(0,1120px); gap:24px; width:min(1400px,100%); margin:0 auto; padding:34px 22px 56px; }
+    main { min-width:0; }
     header { padding:30px 32px; border-radius:8px; color:white; background:linear-gradient(135deg,#0f766e,#1d4ed8); }
     h1 { margin:0 0 8px; font-size:30px; }
     h2 { margin:32px 0 12px; padding-left:10px; border-left:5px solid var(--accent); font-size:22px; }
@@ -32,11 +34,34 @@
     .muted { color:var(--muted); }
     .home-link { display:inline-flex; align-items:center; margin-bottom:18px; color:var(--accent2); font-weight:700; text-decoration:none; }
     .home-link:hover { text-decoration:underline; }
+    .side-nav { position:sticky; top:24px; align-self:start; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--card); }
+    .side-nav-title { margin:0 0 10px; color:var(--muted); font-size:13px; font-weight:700; }
+    .side-nav a { display:block; padding:7px 8px; border-radius:6px; color:#243244; font-size:14px; text-decoration:none; }
+    .side-nav a:hover { background:#eaf1f8; color:var(--accent2); }
+    @media (max-width:900px) {
+      .layout { display:block; padding:24px 16px 48px; }
+      .side-nav { position:static; margin-bottom:18px; }
+      .side-nav a { display:inline-block; margin:2px; }
+    }
   </style>
 </head>
 <body>
+<div class="layout">
+<aside class="side-nav" aria-label="页面导航">
+  <p class="side-nav-title">快速切换</p>
+  <a href="#positioning">1. Demo 定位</a>
+  <a href="#format">2. 输出格式</a>
+  <a href="#evaluation">3. 评测协议</a>
+  <a href="#data">4. 数据制造计划</a>
+  <a href="#reward">5. Reward 设计</a>
+  <a href="#training">6. GRPO 训练设置</a>
+  <a href="#success">7. Demo 成功标准</a>
+  <a href="#execution">8. Demo 执行顺序</a>
+  <a href="#risks">9. 风险与规避</a>
+  <a href="#delivery">10. 最小可交付结果</a>
+</aside>
 <main>
-  <a class="home-link" href="../index.html">← 返回首页</a>
+  <a class="home-link" href="index.html">← 返回首页</a>
   <header>
     <h1>时序化 GRPO Demo 计划 v1</h1>
     <p class="lead">一个“小而精、快准狠”的 dialogue speech temporal caption demo：用 D-ORCA 的 who / what / when 拆解，暴露并修复 Qwen2.5-Omni 的时序化 caption 问题。</p>
@@ -49,7 +74,7 @@
     </div>
   </header>
 
-  <section>
+  <section id="positioning">
     <h2>1. Demo 定位</h2>
     <p>本 demo 不追求大而全，目标是用最小数据和最直接 reward 暴露并修复 Qwen2.5-Omni 在 dialogue speech caption 中的 temporal caption 问题。</p>
     <p>核心任务从泛化 audio caption 收窄为：</p>
@@ -65,7 +90,7 @@
     <p class="note">本 demo 的论文价值在于证明：对 dialogue speech 场景，时序化 caption 可以通过结构化输出和可验证 reward 被 GRPO 快速改善。</p>
   </section>
 
-  <section>
+  <section id="format">
     <h2>2. 输出格式</h2>
     <p>统一要求模型输出结构化 caption，便于 reward 解析。</p>
     <pre><code>&lt;answer&gt;
@@ -85,7 +110,7 @@
     <p>demo v1 建议先只强制 <code>&lt;answer&gt;</code>，避免模型被复杂格式拖垮。后续若 reward 解析不稳，再加入 <code>&lt;think&gt;</code>。</p>
   </section>
 
-  <section>
+  <section id="evaluation">
     <h2>3. 评测协议</h2>
     <h3>3.1 评测目标</h3>
     <p>评测必须能暴露 Qwen2.5-Omni 的具体问题，而不是只给一个笼统 caption 分数。</p>
@@ -139,7 +164,7 @@
     <p>仅当 <code>match_score &gt;= 0.3</code> 才视为有效匹配。</p>
   </section>
 
-  <section>
+  <section id="data">
     <h2>4. 数据制造计划</h2>
     <h3>4.1 训练数据规模</h3>
     <p>GRPO 训练只做高质量 1000 条。</p>
@@ -216,7 +241,7 @@ duration in [8s, 30s]</code></pre>
     <p>speaker v1 不要求真实姓名，只要求 <code>Speaker 1 / Speaker 2</code> 一致。若使用影视或访谈数据，可额外保留 <code>speaker_name</code>，但 reward 先按匿名 speaker 计算。</p>
   </section>
 
-  <section>
+  <section id="reward">
     <h2>5. Reward 设计</h2>
     <h3>5.1 总 reward</h3>
     <p>借鉴 D-ORCA，reward 分成 who / what / when。</p>
@@ -269,7 +294,7 @@ duration in [8s, 30s]</code></pre>
     <p>如果 baseline 本身时间戳很差，可以先让模型输出离散时间：<code>beginning / middle / end</code>。但 demo v1 优先尝试秒级 timestamp，因为 dialogue turn 的边界比泛声事件更容易标注。</p>
   </section>
 
-  <section>
+  <section id="training">
     <h2>6. GRPO 训练设置</h2>
     <h3>6.1 基模</h3>
     <p>主实验：<code>Qwen2.5-Omni</code></p>
@@ -308,7 +333,7 @@ Do not summarize. Do not add events that are not spoken.</code></pre>
     <pre><code>Base vs GRPO full curriculum</code></pre>
   </section>
 
-  <section>
+  <section id="success">
     <h2>7. Demo 成功标准</h2>
     <p>在 100 条 Dialogue-TCap-Bench 上，希望看到：</p>
     <table>
@@ -329,7 +354,7 @@ Do not summarize. Do not add events that are not spoken.</code></pre>
     </div>
   </section>
 
-  <section>
+  <section id="execution">
     <h2>8. Demo 执行顺序</h2>
     <table>
       <thead><tr><th>步骤</th><th>动作</th><th>产物/检查</th></tr></thead>
@@ -344,7 +369,7 @@ Do not summarize. Do not add events that are not spoken.</code></pre>
     </table>
   </section>
 
-  <section>
+  <section id="risks">
     <h2>9. 风险与规避</h2>
     <table>
       <thead><tr><th>风险</th><th>表现</th><th>规避</th></tr></thead>
@@ -359,7 +384,7 @@ Do not summarize. Do not add events that are not spoken.</code></pre>
     </table>
   </section>
 
-  <section>
+  <section id="delivery">
     <h2>10. 最小可交付结果</h2>
     <ol>
       <li>一个 100 条的 Dialogue-TCap-Bench。</li>
@@ -375,7 +400,8 @@ Do not summarize. Do not add events that are not spoken.</code></pre>
 用小规模精选数据和 curriculum GRPO 快速塑形模型的时序化 caption 行为。</code></pre>
   </section>
 
-  <p class="muted">Source: plan/demo_plan_v1.md</p>
+  <p class="muted">Source: demo_plan_v1.md</p>
 </main>
+</div>
 </body>
 </html>

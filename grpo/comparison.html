@@ -13,6 +13,8 @@ h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em;
 h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
 h3 { margin:30px 0 10px; font-size:1.08rem; }
 p { margin:12px 0; }
+.home-link { display:inline-flex; align-items:center; margin:0 0 20px; color:var(--accent); font-weight:700; text-decoration:none; }
+.home-link:hover { text-decoration:underline; }
 h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
 ul { margin:12px 0; padding-left:1.4rem; }
 li { margin:6px 0; }
@@ -29,13 +31,18 @@ strong { font-weight:700; }
 .notice { margin:0 0 28px; padding:16px 18px; border:1px solid #bfd0ff; border-radius:12px; background:#f1f5ff; color:#17368d; }
 .notice strong { display:block; margin-bottom:4px; font-size:1.02rem; }
 .notice p { margin:0; color:#29406f; }
+.brief-table td:not(:first-child), .brief-table th:not(:first-child) { text-align:center; }
+.brief-table .gain { display:block; margin-top:2px; color:#166534; font-size:.86rem; font-weight:700; }
 @media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
 @media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
 </style>
 </head>
 <body><main>
+<a class="home-link" href="../index.html">← 返回首页</a>
 <h1>GRPO vs Baseline Probing Summary</h1>
 <div class="notice"><strong>External AQA Benchmark Probe</strong><p>GRPO shows a consistent improvement over the baseline on external audio question-answering probes, suggesting better transfer from temporal caption training to downstream audio understanding.</p></div>
+<h2>💥 Brief Result</h2>
+<div class="table-wrap"><table class="brief-table"><thead><tr><th>Model</th><th>MMAU speech Accuracy</th><th>MMSU Accuracy</th></tr></thead><tbody><tr><td>Baseline</td><td>20.12%</td><td>34.00%</td></tr><tr><td><strong>GRPO</strong></td><td><strong>28.53%</strong><span class="gain">+8.41 pts</span></td><td><strong>38.40%</strong><span class="gain">+4.40 pts</span></td></tr></tbody></table></div>
 <h2>Result</h2>
 <div class="table-wrap"><table><thead><tr><th>Benchmark</th><th>Model</th><th>Samples</th><th>Correct</th><th>Accuracy</th><th>Coverage</th><th>Answered Accuracy</th><th>Report</th></tr></thead><tbody><tr><td>MMAU speech</td><td>Baseline</td><td>333</td><td>67</td><td>20.12%</td><td>30.03%</td><td>67.00%</td><td><code>mmau:speech_baseline.html</code></td></tr><tr><td>MMAU speech</td><td>GRPO</td><td>333</td><td>95</td><td>28.53%</td><td>39.64%</td><td>71.97%</td><td><code>mmau:speech_grpo.html</code></td></tr><tr><td>MMSU stratified-500</td><td>Baseline</td><td>500</td><td>170</td><td>34.00%</td><td>48.60%</td><td>69.96%</td><td><code>mmsu_baseline.html</code></td></tr><tr><td>MMSU stratified-500</td><td>GRPO</td><td>500</td><td>192</td><td>38.40%</td><td>53.40%</td><td>71.91%</td><td><code>mmsu_grpo.html</code></td></tr></tbody></table></div>
 <h2>Pairwise Movement</h2>
