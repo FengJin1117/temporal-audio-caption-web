@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRPO vs Baseline Probing Summary</title>
+<style>
+:root { color-scheme: light; --ink:#18212f; --muted:#5f6b7a; --line:#dce3ea; --panel:#f6f8fb; --accent:#3157d5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#eef2f6; color:var(--ink); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { width:min(1040px,calc(100% - 32px)); margin:32px auto; padding:48px 56px 64px; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 12px 35px rgba(31,45,61,.08); }
+h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em; }
+h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
+h3 { margin:30px 0 10px; font-size:1.08rem; }
+p { margin:12px 0; }
+h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
+ul { margin:12px 0; padding-left:1.4rem; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:16px 0 22px; border:1px solid var(--line); border-radius:10px; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; }
+th { background:var(--panel); color:var(--muted); font-size:.82rem; letter-spacing:.04em; text-transform:uppercase; }
+td:last-child,th:last-child { text-align:right; }
+tbody tr:last-child td { border-bottom:0; }
+code { padding:.12em .35em; border-radius:5px; background:#eef1f5; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+pre { overflow:auto; margin:14px 0 22px; padding:18px; border:1px solid #293443; border-radius:10px; background:#111827; color:#e5edf6; line-height:1.5; }
+pre code { padding:0; background:none; color:inherit; white-space:pre-wrap; overflow-wrap:anywhere; }
+strong { font-weight:700; }
+.notice { margin:0 0 28px; padding:16px 18px; border:1px solid #bfd0ff; border-radius:12px; background:#f1f5ff; color:#17368d; }
+.notice strong { display:block; margin-bottom:4px; font-size:1.02rem; }
+.notice p { margin:0; color:#29406f; }
+@media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
+@media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
+</style>
+</head>
+<body><main>
+<h1>GRPO vs Baseline Probing Summary</h1>
+<div class="notice"><strong>External AQA Benchmark Probe</strong><p>GRPO shows a consistent improvement over the baseline on external audio question-answering probes, suggesting better transfer from temporal caption training to downstream audio understanding.</p></div>
+<h2>Result</h2>
+<div class="table-wrap"><table><thead><tr><th>Benchmark</th><th>Model</th><th>Samples</th><th>Correct</th><th>Accuracy</th><th>Coverage</th><th>Answered Accuracy</th><th>Report</th></tr></thead><tbody><tr><td>MMAU speech</td><td>Baseline</td><td>333</td><td>67</td><td>20.12%</td><td>30.03%</td><td>67.00%</td><td><code>mmau:speech_baseline.html</code></td></tr><tr><td>MMAU speech</td><td>GRPO</td><td>333</td><td>95</td><td>28.53%</td><td>39.64%</td><td>71.97%</td><td><code>mmau:speech_grpo.html</code></td></tr><tr><td>MMSU stratified-500</td><td>Baseline</td><td>500</td><td>170</td><td>34.00%</td><td>48.60%</td><td>69.96%</td><td><code>mmsu_baseline.html</code></td></tr><tr><td>MMSU stratified-500</td><td>GRPO</td><td>500</td><td>192</td><td>38.40%</td><td>53.40%</td><td>71.91%</td><td><code>mmsu_grpo.html</code></td></tr></tbody></table></div>
+<h2>Pairwise Movement</h2>
+<div class="table-wrap"><table><thead><tr><th>Benchmark</th><th>GRPO wins</th><th>GRPO losses</th><th>Both correct</th><th>Both wrong or abstained</th></tr></thead><tbody><tr><td>MMAU speech</td><td>38</td><td>10</td><td>57</td><td>228</td></tr><tr><td>MMSU stratified-500</td><td>44</td><td>22</td><td>148</td><td>286</td></tr></tbody></table></div>
+<h2>Artifacts</h2>
+<ul><li><code>mmau:speech_comparison.html</code> contains MMAU pairwise examples.</li><li><code>mmsu_comparison.html</code> contains MMSU pairwise examples.</li><li>Per-model HTML reports and source JSON artifacts are stored in the same eval directory.</li></ul>
+</main></body>
+</html>
