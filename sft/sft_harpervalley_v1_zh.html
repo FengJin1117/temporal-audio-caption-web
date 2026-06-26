@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SFT HarperValley v1 对比计划</title>
+<style>
+:root { color-scheme: light; --ink:#18212f; --muted:#5f6b7a; --line:#dce3ea; --panel:#f6f8fb; --accent:#3157d5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#eef2f6; color:var(--ink); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { width:min(1040px,calc(100% - 32px)); margin:32px auto; padding:48px 56px 64px; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 12px 35px rgba(31,45,61,.08); }
+h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em; }
+h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
+h3 { margin:30px 0 10px; font-size:1.08rem; }
+p { margin:12px 0; }
+h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
+ul { margin:12px 0; padding-left:1.4rem; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:16px 0 22px; border:1px solid var(--line); border-radius:10px; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; }
+th { background:var(--panel); color:var(--muted); font-size:.82rem; letter-spacing:.04em; text-transform:uppercase; }
+td:last-child,th:last-child { text-align:right; }
+tbody tr:last-child td { border-bottom:0; }
+code { padding:.12em .35em; border-radius:5px; background:#eef1f5; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+pre { overflow:auto; margin:14px 0 22px; padding:18px; border:1px solid #293443; border-radius:10px; background:#111827; color:#e5edf6; line-height:1.5; }
+pre code { padding:0; background:none; color:inherit; white-space:pre-wrap; overflow-wrap:anywhere; }
+strong { font-weight:700; }
+.home-link { display:inline-flex; margin:0 0 24px; color:var(--accent); font-weight:700; text-decoration:none; }
+.home-link:hover { text-decoration:underline; }
+@media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
+@media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
+</style>
+</head>
+<body><main>
+<a class="home-link" href="../index.html">← 返回首页</a>
+<h1>SFT HarperValley v1 对比计划</h1>
+<h2>核心问题</h2>
+<p>GRPO 运行使用了一个细粒度的时间音频 caption 奖励，覆盖格式、说话人、内容和时间。本 SFT 对照实验用于检验：这个奖励是否实际上等价于对规范目标进行监督拟合。</p>
+<p>主要对比刻意保持简单：使用相同的 1000 条 HarperValley 训练音频、相同的验证集划分、相同的提示词、相同的输出语法、一个 epoch，以及全参数 Qwen2.5-Omni 训练。唯一主要的方法差异是 GRPO 策略优化对比 teacher-forcing SFT 交叉熵。</p>
+<h2>实验设计</h2>
+<ul><li>数据来源：<code>data/harpervalley_grpo/train.jsonl</code> 和 <code>validation.jsonl</code>。</li><li>SFT 格式：ms-swift <code>messages + audios</code> JSONL。</li><li>用户消息：<code>&lt;audio&gt;</code> 后接 <code>prompts/harpervalley_v1.txt</code>。</li><li>Assistant 目标：由每条记录的 <code>turns</code> 确定性渲染出的规范 caption。</li><li>描述文本：<code>A clear voice speaks at a natural pace; no prominent background event is audible.</code></li><li>训练：全参数 ms-swift SFT，BF16，1 个 epoch，学习率 <code>1e-6</code>，随机种子 <code>42</code>。</li><li>评估：复用 GRPO HarperValley 基准协议，temperature <code>0</code>，<code>max_new_tokens=512</code>，不重试，不修复输出。</li></ul>
+<p>第一个版本不使用按奖励加权的 token loss。加权 SFT trainer 会是一个有价值的后续消融实验，但如果放进主对比，会让结果更难解释。</p>
+<h2>实现产物</h2>
+<ul><li><code>scripts/build_sft_dataset.py</code> 将 GRPO JSONL 记录转换为 ms-swift SFT JSONL，并用项目 parser 验证每一个渲染目标。</li><li><code>exp/sft_harpervalley_v1/run_sft_pipeline.sh</code> 构建数据、运行 ms-swift SFT、修复 Qwen2.5-Omni 配置符号链接、使用现有基准流水线评估，并写出最终报告。</li><li><code>scripts/write_sft_report.py</code> 在同一份报告中比较 base、GRPO 和 SFT 指标。</li><li>SFT 训练数据写入 <code>exp/sft_harpervalley_v1/data/</code>。</li><li>SFT 结果写入 <code>exp/sft_harpervalley_v1/</code>。</li></ul>
+<h2>结果解读</h2>
+<p>如果 SFT 在域内和下游任务上都弱于 GRPO，那么该奖励并不只是一个伪装成强化学习的监督模板。如果 SFT 在 HarperValley 上优于 GRPO，但迁移表现更差，那么该奖励很可能在规范目标拟合之外提升了鲁棒性或探索能力。如果 SFT 在域内和下游都追平或优于 GRPO，那么这个奖励设计可能主要是在恢复一个监督式时间 caption 目标。</p>
+<h2>验收检查</h2>
+<ul><li><code>scripts/build_sft_dataset.py</code> 应准确生成 1000 条训练样本和 100 条验证样本。</li><li>生成的 JSONL 中所有音频路径都是绝对路径，并且文件存在。</li><li>所有 assistant 目标都能被 <code>temporal_caption.parser</code> 成功解析。</li><li>流水线脚本通过 shell 语法检查。</li><li>HTML 计划由这份 markdown 使用现有项目 renderer 生成。</li></ul>
+</main></body>
+</html>
