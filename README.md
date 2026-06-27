@@ -10,4 +10,4 @@ The site is a standalone static page published with GitHub Pages.
 - `benchmark/`: benchmark analysis
 - `baseline/`: baseline results and inference examples
 - `grpo/`: GRPO evaluation results and representative examples
-- `sft/`: SFT experiment plan
+- `sft/`: SFT experiment plan and benchmark comparison
