@@ -90,6 +90,10 @@
     .option-box:hover { border-color:#9fb7d9; transform:translateY(-1px); box-shadow:0 10px 24px rgba(49,87,213,.09); transition:.16s ease; }
     .option-box strong { display:block; margin-bottom:3px; }
     .option-box span { color:var(--muted); font-size:.92rem; }
+    .benchmark-box { margin-top:14px; padding:16px; border:1px solid #cbd8ea; border-radius:18px; background:#f9fbff; }
+    .benchmark-box-title { display:block; margin-bottom:4px; color:var(--ink); font-size:1.05rem; font-weight:850; }
+    .benchmark-box-desc { margin:0 0 12px; color:var(--muted); font-size:.92rem; }
+    .benchmark-box .subnav a { background:#eef3ff; }
     .flow { display:grid; gap:10px; margin-top:14px; }
     .step { padding:14px; border:1px solid var(--line); border-radius:14px; background:#fbfcff; }
     .step-label { color:var(--violet); font-size:.8rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
@@ -230,14 +234,14 @@
           <div class="metric"><strong>SRCC</strong><span>事件排序一致性</span></div>
         </div>
         <div class="requirement">要求：需要 GT Caption 或 rule-based 信息。</div>
-        <a class="option-box" href="caption_benchmark/baseline-tacos-200-bench.html">
-          <strong>成绩</strong>
-          <span>TACOS-200 Baseline Model Comparison · Event-F1 / Segment-F1 / Hall%</span>
-        </a>
-        <a class="option-box" href="caption_benchmark/tacos-200-dedup.html">
-          <strong>Benchmark信息</strong>
-          <span>TACOS-200 dedup subset report · 数据分布与指标说明</span>
-        </a>
+        <div class="benchmark-box">
+          <strong class="benchmark-box-title">TACOS</strong>
+          <p class="benchmark-box-desc">TACOS-200 dedup subset：caption 直接指标评测与数据说明。</p>
+          <div class="subnav">
+            <a href="caption_benchmark/baseline-tacos-200-bench.html">成绩</a>
+            <a href="caption_benchmark/tacos-200-dedup.html">Benchmark信息</a>
+          </div>
+        </div>
         <div class="placeholder">各类 caption 指标梳理 · 整理中</div>
       </section>
 
