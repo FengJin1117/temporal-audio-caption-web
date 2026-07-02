@@ -2,7 +2,9 @@
 
 Temporal audio captioning research showcase.
 
-The site is a standalone static page published with GitHub Pages.
+The site is a standalone static showcase published with GitHub Pages.
+
+The homepage is organized into Motivation, TODO, Speech modality solutions, and Benchmark system sections.
 
 ## Site structure
 
@@ -11,3 +13,4 @@ The site is a standalone static page published with GitHub Pages.
 - `baseline/`: baseline results and inference examples
 - `grpo/`: GRPO evaluation results and representative examples
 - `sft/`: SFT experiment plan and benchmark comparison
+- `sft+grpo/`: SFT+GRPO benchmark comparison and V2 improvement plan

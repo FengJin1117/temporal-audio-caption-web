@@ -5,63 +5,246 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Temporal Audio Caption</title>
   <style>
-    :root { --ink:#172033; --muted:#667085; --line:#dce4ed; --bg:#f4f7fa; --card:#fff; --accent:#176b87; --accent-soft:#e7f3f6; }
+    :root {
+      color-scheme: light;
+      --ink:#172033;
+      --muted:#667085;
+      --line:#d8e2ee;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --blue:#3157d5;
+      --blue-soft:#eef3ff;
+      --cyan:#176b87;
+      --cyan-soft:#eaf6f8;
+      --green:#22765b;
+      --green-soft:#eef8f3;
+      --amber:#946200;
+      --amber-soft:#fff8e8;
+      --violet:#6b4fd3;
+      --violet-soft:#f3f0ff;
+    }
     * { box-sizing:border-box; }
-    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:32px 20px; background:var(--bg); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
-    main { width:min(900px,100%); }
-    h1 { margin:0 0 26px; text-align:center; font-size:clamp(2rem,6vw,3.6rem); line-height:1.1; letter-spacing:-.045em; }
-    .announcement { display:flex; align-items:center; gap:14px; margin:0 0 20px; padding:15px 18px; border:1px solid #a9d5c0; border-radius:16px; background:#f0fbf5; color:#125a3c; font-weight:750; text-decoration:none; box-shadow:0 8px 24px rgba(18,90,60,.07); }
-    .announcement:hover { border-color:#65b78e; transform:translateY(-1px); transition:.18s ease; }
-    .announcement-icon { flex:none; font-size:1.45rem; }
-    .announcement-text { flex:1; }
-    .announcement-arrow { flex:none; font-size:1.25rem; }
-    nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
-    .nav-card { min-height:150px; padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--card); box-shadow:0 10px 30px rgba(23,32,51,.06); }
-    .nav-card > a, .nav-title { color:var(--ink); font-size:1.3rem; font-weight:750; text-decoration:none; }
-    .nav-card > a { height:100%; display:flex; align-items:center; justify-content:space-between; }
-    .nav-card > a::after { content:"→"; color:var(--accent); }
-    .nav-card:has(> a):hover { border-color:#9fc6d2; transform:translateY(-2px); transition:.18s ease; }
-    .nav-title { display:block; margin-bottom:18px; }
-    .subnav { display:flex; flex-wrap:wrap; gap:10px; }
-    .subnav a { padding:9px 14px; border-radius:999px; background:var(--accent-soft); color:var(--accent); font-weight:700; text-decoration:none; }
-    a:focus-visible { outline:3px solid #7ac0d3; outline-offset:4px; }
-    @media (max-width:640px) { body { place-items:start center; padding-top:48px; } h1 { margin-bottom:22px; } .announcement { align-items:flex-start; } nav { grid-template-columns:1fr; } .nav-card { min-height:112px; } }
+    body {
+      margin:0;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(49,87,213,.08), transparent 32%),
+        radial-gradient(circle at 90% 8%, rgba(23,107,135,.08), transparent 30%),
+        var(--bg);
+      color:var(--ink);
+      font:16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { width:min(1180px, calc(100% - 36px)); margin:0 auto; padding:42px 0 64px; }
+    .hero { margin-bottom:22px; padding:34px 36px; border:1px solid var(--line); border-radius:28px; background:rgba(255,255,255,.82); box-shadow:0 18px 55px rgba(23,32,51,.07); }
+    h1 { margin:0; font-size:clamp(2.2rem, 6vw, 4.6rem); line-height:1.02; letter-spacing:-.055em; }
+    .eyebrow { margin:0 0 8px; color:var(--cyan); font-size:.78rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+    .hero-note { max-width:760px; margin:16px 0 0; color:var(--muted); font-size:1.05rem; }
+    .overview { display:grid; grid-template-columns:1.1fr .9fr; gap:16px; margin:22px 0; }
+    .panel, .section, .nav-card, .metric-card, .flow-card {
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:var(--card);
+      box-shadow:0 12px 36px rgba(23,32,51,.055);
+    }
+    .panel { padding:24px 26px; }
+    .panel.motivation { background:linear-gradient(135deg, var(--blue-soft), #ffffff 72%); }
+    .panel.todo { background:linear-gradient(135deg, var(--green-soft), #ffffff 72%); }
+    h2 { margin:0 0 12px; font-size:1.45rem; line-height:1.25; letter-spacing:-.02em; }
+    h3 { margin:0 0 8px; font-size:1.05rem; line-height:1.3; }
+    p { margin:10px 0; }
+    ul, ol { margin:10px 0 0; padding-left:1.25rem; }
+    li { margin:4px 0; }
+    .tag { display:inline-flex; align-items:center; width:max-content; margin-top:10px; padding:5px 10px; border-radius:999px; background:#ffffffb8; color:var(--muted); border:1px solid var(--line); font-size:.86rem; font-weight:700; }
+    .section { margin-top:18px; padding:28px; }
+    .section.speech { background:linear-gradient(135deg, var(--cyan-soft), #fff 58%); }
+    .section.benchmark { background:linear-gradient(135deg, var(--violet-soft), #fff 58%); }
+    .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
+    .section-head p { max-width:620px; margin:0; color:var(--muted); }
+    .nav-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px; }
+    .nav-card { min-height:148px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; }
+    .nav-card.highlight { border-color:#b8dce5; background:#f8fdfe; }
+    .nav-title { display:block; margin-bottom:8px; color:var(--ink); font-size:1.15rem; font-weight:800; }
+    .nav-desc { margin:0 0 16px; color:var(--muted); font-size:.93rem; }
+    .subnav { display:flex; flex-wrap:wrap; gap:9px; }
+    .subnav a, .pill-link {
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--blue-soft);
+      color:var(--blue);
+      font-weight:750;
+      font-size:.92rem;
+      text-decoration:none;
+    }
+    .subnav a:hover, .pill-link:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(49,87,213,.12); transition:.16s ease; }
+    .benchmark-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .metric-card, .flow-card { padding:22px; background:#fff; }
+    .metric-list { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .metric { padding:12px 13px; border:1px solid var(--line); border-radius:14px; background:#fbfcff; }
+    .metric strong { display:block; margin-bottom:2px; }
+    .metric span { color:var(--muted); font-size:.9rem; }
+    .requirement { margin-top:14px; padding:12px 14px; border-radius:14px; background:var(--amber-soft); color:#5f430a; border:1px solid #f2daa1; }
+    .placeholder { margin-top:14px; padding:14px; border:1px dashed #b9c7d8; border-radius:14px; background:#f8fafc; color:var(--muted); }
+    .flow { display:grid; gap:10px; margin-top:14px; }
+    .step { padding:14px; border:1px solid var(--line); border-radius:14px; background:#fbfcff; }
+    .step-label { color:var(--violet); font-size:.8rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+    .insight { margin-top:14px; padding:14px; border-radius:14px; background:#f7f3ff; color:#4f3ca1; border:1px solid #ded4ff; font-weight:700; }
+    a:focus-visible { outline:3px solid #8fc7d6; outline-offset:4px; }
+    @media (max-width:980px) {
+      .overview, .benchmark-grid { grid-template-columns:1fr; }
+      .nav-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width:640px) {
+      main { width:min(100% - 24px, 1180px); padding:24px 0 42px; }
+      .hero, .panel, .section { padding:22px; border-radius:20px; }
+      .section-head { display:block; }
+      .nav-grid, .metric-list { grid-template-columns:1fr; }
+      .nav-card { min-height:128px; }
+    }
   </style>
 </head>
 <body>
 <main>
-  <h1>Temporal Audio Caption</h1>
-  <a class="announcement" href="grpo/representative_examples.html">
-    <span class="announcement-icon" aria-hidden="true">🎉📢</span>
-    <span class="announcement-text">GRPO 提升 dialogue-centric speech caption：代表性样例展示</span>
-    <span class="announcement-arrow" aria-hidden="true">→</span>
-  </a>
-  <nav aria-label="项目导航">
-    <section class="nav-card"><a href="demo_plan_v1.html">Plan（Demo 验证计划）</a></section>
-    <section class="nav-card"><a href="benchmark/benchmark_analysis.html">Benchmark</a></section>
-    <section class="nav-card">
-      <span class="nav-title">Baseline</span>
-      <div class="subnav">
-        <a href="baseline/RESULTS.html">成绩</a>
-        <a href="baseline/raw_outputs.html">Examples</a>
-      </div>
+  <header class="hero">
+    <p class="eyebrow">Temporal Audio Understanding</p>
+    <h1>Temporal Audio Caption</h1>
+    <p class="hero-note">面向语音大模型的时序化 audio caption 展示页：从 speech rule-based 奖励起步，逐步扩展到 benchmark 体系与全音频模态。</p>
+  </header>
+
+  <div class="overview" aria-label="项目动机与 TODO">
+    <section class="panel motivation">
+      <h2>Motivation</h2>
+      <p>提升语音大模型的时序 Caption 能力。目前痛点：</p>
+      <ul>
+        <li>顺序</li>
+        <li>并行事件混淆（鸡尾酒会）</li>
+      </ul>
+      <span class="tag">修改中</span>
     </section>
-    <section class="nav-card">
-      <span class="nav-title">GRPO</span>
-      <div class="subnav">
-        <a href="grpo/RESULTS.html">成绩</a>
-        <a href="grpo/comparison.html">Probe</a>
-        <a href="grpo/representative_examples.html">Examples</a>
-      </div>
+
+    <section class="panel todo">
+      <h2>TODO</h2>
+      <ul>
+        <li>建立 benchmark 评测体系（Caption Benchmark、QA Benchmark）</li>
+        <li>全音频模态（sound、music、speech）方案落地</li>
+      </ul>
     </section>
-    <section class="nav-card">
-      <span class="nav-title">SFT</span>
-      <div class="subnav">
-        <a href="sft/sft_harpervalley_v1_zh.html">Plan</a>
-        <a href="sft/sft_comparision.html">成绩</a>
+  </div>
+
+  <section class="section speech" aria-labelledby="speech-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Speech Modality</p>
+        <h2 id="speech-title">Speech模态解决方案：Who / What / When奖励（Rule-Based）</h2>
       </div>
-    </section>
-  </nav>
+      <p>当前 Plan、Benchmark、Baseline、GRPO、SFT 与 SFT+GRPO 都归入 speech dialogue temporal caption 的 rule-based 奖励路线。</p>
+    </div>
+
+    <nav class="nav-grid" aria-label="Speech 模态解决方案导航">
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">Plan</span>
+          <p class="nav-desc">Demo 验证计划与执行路线。</p>
+        </div>
+        <div class="subnav"><a href="plan/demo_plan_v1.html">Demo Plan</a></div>
+      </section>
+
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">Benchmark</span>
+          <p class="nav-desc">HarperValley dialogue temporal caption benchmark 分析。</p>
+        </div>
+        <div class="subnav"><a href="benchmark/benchmark_analysis.html">分析</a></div>
+      </section>
+
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">Baseline</span>
+          <p class="nav-desc">Qwen2.5-Omni-7B baseline 结果与原始输出样例。</p>
+        </div>
+        <div class="subnav">
+          <a href="baseline/RESULTS.html">成绩</a>
+          <a href="baseline/raw_outputs.html">Examples</a>
+        </div>
+      </section>
+
+      <section class="nav-card highlight">
+        <div>
+          <span class="nav-title">GRPO</span>
+          <p class="nav-desc">dialogue-centric speech caption 的 GRPO 提升、probe 与代表性样例。</p>
+        </div>
+        <div class="subnav">
+          <a href="grpo/RESULTS.html">成绩</a>
+          <a href="grpo/comparison.html">Probe</a>
+          <a href="grpo/representative_examples.html">🎉📢 Examples</a>
+        </div>
+      </section>
+
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">SFT</span>
+          <p class="nav-desc">监督拟合作为 GRPO reward 的对照实验。</p>
+        </div>
+        <div class="subnav">
+          <a href="sft/sft_harpervalley_v1_zh.html">Plan</a>
+          <a href="sft/sft_comparision.html">成绩</a>
+        </div>
+      </section>
+
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">SFT+GRPO</span>
+          <p class="nav-desc">SFT 后继续 GRPO 的成绩与失败分析 / V2 改进方案。</p>
+        </div>
+        <div class="subnav">
+          <a href="sft+grpo/sft_comparision.html">成绩</a>
+          <a href="sft+grpo/GRPO_FAILURE_ANALYSIS_AND_PLAN_V2.html">改进方案</a>
+        </div>
+      </section>
+    </nav>
+  </section>
+
+  <section class="section benchmark" aria-labelledby="benchmark-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Evaluation System</p>
+        <h2 id="benchmark-title">Benchmark体系</h2>
+      </div>
+      <p>同时建设直接 caption 指标和下游 QA 指标：一个看描述本身是否完整真实，一个看描述能否支持推理问答。</p>
+    </div>
+
+    <div class="benchmark-grid">
+      <section class="metric-card">
+        <h3>直接指标：Caption Benchmark</h3>
+        <p>推荐指标：</p>
+        <div class="metric-list">
+          <div class="metric"><strong>Event F1</strong><span>通用事件匹配质量</span></div>
+          <div class="metric"><strong>Miss%</strong><span>缺失率</span></div>
+          <div class="metric"><strong>Hallucination%</strong><span>幻觉率</span></div>
+          <div class="metric"><strong>IoU</strong><span>时序边界重叠</span></div>
+          <div class="metric"><strong>SRCC</strong><span>事件排序一致性</span></div>
+        </div>
+        <div class="requirement">要求：需要 GT Caption 或 rule-based 信息。</div>
+        <div class="placeholder">各类 caption 指标梳理 · 整理中</div>
+      </section>
+
+      <section class="flow-card">
+        <h3>下游任务：QA Benchmark</h3>
+        <div class="flow">
+          <div class="step">
+            <div class="step-label">Step 1</div>
+            <div>评测模型做 audio caption。</div>
+          </div>
+          <div class="step">
+            <div class="step-label">Step 2</div>
+            <div>外部 LLM 根据 Caption，回答 QA 问题。</div>
+          </div>
+        </div>
+        <div class="insight">💡 Insight：好的 Caption 会详细真实地描述 audio 信息，LLM 回答的准确率越高。</div>
+      </section>
+    </div>
+  </section>
 </main>
 </body>
 </html>

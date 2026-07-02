@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SFT+GRPO V2 改进方案</title>
+<style>
+:root { color-scheme: light; --ink:#18212f; --muted:#5f6b7a; --line:#dce3ea; --panel:#f6f8fb; --accent:#3157d5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#eef2f6; color:var(--ink); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { width:min(1040px,calc(100% - 32px)); margin:32px auto; padding:48px 56px 64px; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 12px 35px rgba(31,45,61,.08); }
+h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em; }
+h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
+h3 { margin:30px 0 10px; font-size:1.08rem; }
+p { margin:12px 0; }
+h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
+ul { margin:12px 0; padding-left:1.4rem; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:16px 0 22px; border:1px solid var(--line); border-radius:10px; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; }
+th { background:var(--panel); color:var(--muted); font-size:.82rem; letter-spacing:.04em; text-transform:uppercase; }
+td:last-child,th:last-child { text-align:right; }
+tbody tr:last-child td { border-bottom:0; }
+code { padding:.12em .35em; border-radius:5px; background:#eef1f5; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+pre { overflow:auto; margin:14px 0 22px; padding:18px; border:1px solid #293443; border-radius:10px; background:#111827; color:#e5edf6; line-height:1.5; }
+pre code { padding:0; background:none; color:inherit; white-space:pre-wrap; overflow-wrap:anywhere; }
+strong { font-weight:700; }
+.home-link { display:inline-flex; margin:0 0 24px; color:var(--accent); font-weight:700; text-decoration:none; }
+.home-link:hover { text-decoration:underline; }
+@media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
+@media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
+</style>
+</head>
+<body><main>
+<a class="home-link" href="../index.html">← 返回首页</a>
+<h1>SFT+GRPO V2 改进方案</h1>
+<h2>Executive Summary</h2>
+<p>本轮 SFT 后继续 GRPO 没有超过 SFT，主要不是因为格式、推理环境或评测脚本坏了，而是因为 <strong>GRPO 把模型推向了“少报 turn、保留高置信长片段”的策略</strong>。</p>
+<p>HarperValley 上的直接症状是：</p>
+<div class="table-wrap"><table><thead><tr><th>模型</th><th>Overall</th><th>Turn Precision</th><th>Turn Recall</th><th>Turn F1</th><th>Speaker Acc.</th><th>WER</th><th>Temporal IoU</th></tr></thead><tbody><tr><td>SFT</td><td>85.01</td><td>90.95</td><td>90.50</td><td>90.73</td><td>94.20</td><td>8.14</td><td>63.24</td></tr><tr><td>SFT+GRPO</td><td>79.25</td><td>93.94</td><td>46.50</td><td>62.21</td><td>94.62</td><td>12.96</td><td>73.15</td></tr></tbody></table></div>
+<p>GRPO 确实修掉了一些 SFT 的表面问题：HarperValley repetition flags 从 86/100 降到 15/100，completion tokens 中位数从 182.5 降到 106.0，Temporal IoU 从 63.24 提到 73.15。但它同时把平均 segment 数从 3.98 压到 1.98，而 HarperValley reference 平均是 4 turns。最终 recall 崩掉，overall 被拉低。</p>
+<p>结论：<strong>下一步不应先靠单纯调学习率或多训 epoch。先要改 reward / curriculum，让漏 turn 的代价足够大，并在训练中显式监控 predicted-turn count 和 recall。</strong></p>
+<h2>发生了什么</h2>
+<h3>1. SFT+GRPO 学到了“短输出”策略</h3>
+<div class="table-wrap"><table><thead><tr><th>诊断项</th><th>SFT</th><th>SFT+GRPO</th></tr></thead><tbody><tr><td>HarperValley 有效解析</td><td>100/100</td><td>100/100</td></tr><tr><td>重复输出标记</td><td>86/100</td><td>15/100</td></tr><tr><td>completion tokens 中位数</td><td>182.5</td><td>106.0</td></tr><tr><td>平均预测 segments</td><td>3.98</td><td>1.98</td></tr><tr><td>预测 segment 数直方图</td><td>2:14, 3:24, 4:27, 5:25, 6+:10</td><td>1:6, 2:90, 3:4</td></tr></tbody></table></div>
+<p>这能很直接地解释指标变化：</p>
+<ul><li>Precision 上升，是因为模型输出的 turn 更少。</li><li>Temporal IoU 上升，是因为保留下来的 turn 往往是最容易、最长、对齐最好的片段。</li><li>Recall 崩掉，是因为后面的短回应、backchannel 和收尾 turn 被省略了。</li><li>WER 小幅变差，是因为一些被遗漏的短 turn 被合并进相邻的长 turn。</li></ul>
+<h3>2. 局部样例显示的问题是省略和合并，而不是随机退化</h3>
+<p>样例 <code>hvb_0020</code>：</p>
+<ul><li>SFT+GRPO 只输出前两个 turn，而且这两个几乎完全正确。</li><li>SFT 输出了五个 turn，包括网点营业时间回答和收尾 turn。</li><li>SFT+GRPO 在匹配到的 turn 上 Temporal IoU 是 0.985、WER 是 0.0，但 recall 只有 0.40。</li></ul>
+<p>样例 <code>hvb_0035</code>：</p>
+<ul><li>SFT+GRPO 把多个 speaker exchange 合并成一个很长的 Speaker 1 segment。</li><li>Parser 会接受这个输出，但 6 个 reference turns 里只有 1 个能匹配。</li></ul>
+<p>样例 <code>hvb_0074</code>：</p>
+<ul><li>SFT+GRPO 把 “that was everything” 合并进银行客服的回答里，并省略了后续短轮次结构。</li><li>第一个匹配 turn 的 Temporal IoU 很高，但 turn recall 只有 0.1667。</li></ul>
+<p>这是一个典型的 reward shaping 失败：输出更干净、更短，但不完整。</p>
+<h2>训练证据</h2>
+<p>SFT+GRPO 确实是从下面的 SFT checkpoint 正确初始化的：</p>
+<p><code>/data3/fwh/temporal-audio-caption/sft_harpervalley_v1/final</code></p>
+<p>本次训练配置为：</p>
+<ul><li><code>num_generations=4</code></li><li><code>temperature=0.7</code></li><li><code>learning_rate=5e-7</code></li><li><code>beta=0.04</code></li><li><code>curriculum_steps=50</code></li><li>训练一轮 / 167 个 optimizer steps</li><li>使用相同的 <code>data/harpervalley_grpo</code></li><li>使用相同 prompt 和 parser</li><li>使用与 <code>grpo_harpervalley_v1</code> 相同的 who/what/when reward functions</li></ul>
+<p>也就是说，常见的 SFT→GRPO 条件基本都具备：SFT 初始化、reference model 锚定同一个 checkpoint、KL penalty，以及 online sampled completions。</p>
+<p>但训练曲线解释了为什么结果仍然失败：</p>
+<div class="table-wrap"><table><thead><tr><th>训练窗口</th><th>GRPO reward</th><th>SFT+GRPO reward</th><th>GRPO repetition</th><th>SFT+GRPO repetition</th><th>GRPO completion len</th><th>SFT+GRPO completion len</th></tr></thead><tbody><tr><td>前 10 steps</td><td>0.684</td><td>0.180</td><td>0.017</td><td>0.817</td><td>199.5</td><td>199.5</td></tr><tr><td>Steps 40-60</td><td>0.704</td><td>0.210</td><td>0.004</td><td>0.762</td><td>170.9</td><td>172.0</td></tr><tr><td>最后 20 steps</td><td>0.768</td><td>0.527</td><td>0.000</td><td>0.165</td><td>177.6</td><td>105.0</td></tr></tbody></table></div>
+<p>解读：</p>
+<ul><li>在 SFT 初始化阶段，采样 completion 经常触发高重复的 zero-reward gate。</li><li>于是 GRPO 找到了一条最容易避开重复惩罚的路径：显著缩短输出。</li><li>当前 reward 通过 Turn F1 间接惩罚漏 turn，但力度不足，无法阻止“短而高 precision”的策略。</li><li><code>reward_std</code> 在 SFT+GRPO 中更弱：167 steps 里有 46 steps 的 <code>reward_std &lt; 0.01</code>，而 base GRPO 是 0/167。这说明很多 group 缺少有效的相对信号，尤其是在早期。</li></ul>
+<h2>这只是参数问题吗？</h2>
+<p>有一部分是，但主要不是。</p>
+<p>参数确实可能有影响：</p>
+<ul><li><code>beta=0.04</code> 让训练后期 KL 升到约 0.08-0.10，高于原始 GRPO run 常见的 0.03-0.05。这使模型明显偏离了较强的 SFT policy。</li><li>完整一轮训练已经足够让模型强烈转向短输出。</li><li><code>num_generations=4</code> 对接近 SFT 的 policy 来说 group diversity 有限，许多早期 group 的 reward variance 接近 0。</li><li><code>temperature=0.7</code> 可能在早期采样出重复的 SFT completions，触发 hard zero gate，并把模型推向更短的输出。</li></ul>
+<p>但单纯调参不太可能解决核心问题，因为 <strong>reward target 本身没有充分约束 turn coverage</strong>。更低 LR 或更高 beta 可能减少伤害，但不会教会模型“漏掉最后 2-4 个 turn”比“输出一个简洁干净答案”更糟。</p>
+<h2>常见 SFT+GRPO 条件哪些满足了？哪些没有充分满足？</h2>
+<h3>已满足</h3>
+<ul><li>使用 SFT checkpoint 作为 policy 初始化。</li><li>Reference model 从同一个 <code>model_name_or_path</code> 加载，因此 KL anchor 是 SFT policy。</li><li>复用了相同的 train/validation data 和 prompt。</li><li>Rule-based rewards 是确定性且可复现的。</li><li>Evaluation 使用同一个 HarperValley protocol。</li></ul>
+<h3>未充分满足</h3>
+<ul><li><strong>Coverage reward 太弱。</strong> 漏 turn 的惩罚只通过 Turn F1 间接体现，而最终加权 reward 仍可能让两个干净匹配 turn 得到可接受分数。</li><li><strong>没有显式 turn-count reward / guard。</strong> Trainer 没有单独记录或优化 predicted-turn count、recall、count error。</li><li><strong>Hard repetition gate 在早期主导了 SFT+GRPO。</strong> SFT eval 有很多 repetition flags，所以早期 sampled completions 常被置零。最容易的改进方向变成缩短输出，而不是更好地切分 turn。</li><li><strong>没有 validation checkpoint selection。</strong> 最终使用的是 final checkpoint。最佳 tradeoff 可能出现在模型强烈压缩输出之前。</li><li><strong>对 near-SFT policy 来说 group size 太小。</strong> <code>num_generations=4</code> 在很多 steps 产生低 reward variance，削弱了 GRPO 区分“完整但偏啰嗦”和“短而干净”的能力。</li></ul>
+<h2>为什么 MMAU/MMSU 也没有提升？</h2>
+<div class="table-wrap"><table><thead><tr><th>模型</th><th>MMAU speech</th><th>MMSU split</th></tr></thead><tbody><tr><td>SFT</td><td>40.54</td><td>38.60</td></tr><tr><td>SFT+GRPO</td><td>39.94</td><td>37.80</td></tr></tbody></table></div>
+<p>Probe 结果和 HarperValley 的失败模式一致：</p>
+<ul><li>SFT+GRPO 在 probe captions 中显著减少了重复。</li><li>但它也减少了细节和覆盖度，这会伤害 caption-QA。</li><li>MMAU 接近 SFT，是因为很多 speech questions 仍然受益于更干净、简洁的 captions。</li><li>MMSU 略降，可能是因为更广泛的 audio reasoning 更依赖被省略的上下文。</li></ul>
+<h2>下一步建议</h2>
+<h3>优先级 1：用 coverage-first reward 重新跑 GRPO</h3>
+<p>创建 <code>sft+grpo_harpervalley_v2</code>，先改 reward，再做大规模参数 sweep。</p>
+<p>推荐的 reward 修改：</p>
+<ul><li>加入显式 <code>turn_recall_reward</code>。</li><li>加入显式 <code>turn_count_reward = max(0, 1 - abs(predicted_count - reference_count) / reference_count)</code>。</li><li>把漏 turn 行为设成 gate 或强 multiplier：对于 4+ turns 的 clips，如果 recall &lt; 0.8，则限制 total reward 上限。</li><li>保留 repetition penalty，但避免让 repetition 成为早期主导信号。对边界重复模板，优先使用 graded repetition penalty，而不是立即置零。</li></ul>
+<p>建议最终权重：</p>
+<div class="table-wrap"><table><thead><tr><th>组件</th><th>权重</th></tr></thead><tbody><tr><td>format</td><td>0.10</td></tr><tr><td>turn recall / count</td><td>0.30</td></tr><tr><td>who</td><td>0.20</td></tr><tr><td>what</td><td>0.20</td></tr><tr><td>when</td><td>0.15</td></tr><tr><td>repetition/length quality</td><td>0.05</td></tr></tbody></table></div>
+<p>重要：每一步都记录 <code>predicted_turns</code>、<code>reference_turns</code>、<code>turn_recall</code>、<code>turn_precision</code>、<code>count_error</code> 和 <code>repetition_ratio</code>。</p>
+<h3>优先级 2：使用更温和的 SFT+GRPO schedule</h3>
+<p>Reward 修好后，使用更保守的训练配置：</p>
+<ul><li><code>learning_rate=1e-7</code> 或 <code>2e-7</code></li><li><code>beta=0.08</code> 或 <code>0.10</code></li><li>先用 <code>max_steps=50</code>，不要直接训完整 epoch</li><li>如果显存允许，使用 <code>num_generations=6</code> 或 <code>8</code></li><li>保持 <code>temperature=0.5-0.7</code>；如果 repetition 仍然高，先用较低 temperature</li></ul>
+<p>如果 validation predicted-turn mean 低于 3.5，或者 recall 比 SFT 低超过 5 points，就提前停止。</p>
+<h3>优先级 3：在丢弃现有 run 前，先做 checkpoint sweep</h3>
+<p>当前保存的 <code>checkpoint-167</code> 和 <code>final</code> 都是后期 checkpoint，但 training log 显示短输出是在后期加剧的。下一次训练应每 25 或 50 steps 保存并评估：</p>
+<ul><li>checkpoint-25</li><li>checkpoint-50</li><li>checkpoint-75</li><li>checkpoint-100</li><li>checkpoint-125</li></ul>
+<p>最佳模型可能是一个中间 checkpoint：repetition 已经改善，但 turn recall 还没有崩掉。</p>
+<h3>优先级 4：在完整 probe eval 前增加小型 regression harness</h3>
+<p>在跑 MMAU/MMSU 之前，先评估 10-20 个 HarperValley validation/benchmark examples，并要求满足：</p>
+<ul><li>parse rate 100%</li><li>predicted-turn mean 接近 reference-turn mean</li><li>没有系统性的 2-turn collapse</li><li>repetition flags 低于 SFT</li><li>没有 <code>finish_reason=length</code></li></ul>
+<p>这样可以在几分钟内发现本次失败模式。</p>
+<h2>推荐实验矩阵</h2>
+<div class="table-wrap"><table><thead><tr><th>实验</th><th>改动</th><th>目的</th></tr></thead><tbody><tr><td>v2a</td><td>reward 加入 turn recall/count；LR 2e-7；beta 0.08；50 steps</td><td>测试 coverage reward 能否防止 collapse</td></tr><tr><td>v2b</td><td>相同 reward；LR 1e-7；beta 0.10；50 steps</td><td>更强 KL，更安全的 post-SFT update</td></tr><tr><td>v2c</td><td>同 v2a；num_generations 8</td><td>获得更好的 group ranking signal</td></tr><tr><td>v2d</td><td>使用 graded repetition penalty 代替 hard zero；其余同 v2a</td><td>检查 hard gate 是否导致了短输出</td></tr></tbody></table></div>
+<p>只有当短 run 保住 turn recall 后，才运行完整 HarperValley+MMAU+MMSU。</p>
+<h2>一句话结论</h2>
+<p>SFT+GRPO 失败并不是因为 “SFT then GRPO” 这条路线错了，而是因为当前 GRPO 设置奖励了更干净但不完整的 captioning policy。下一轮应该把 coverage 作为一等 reward component，并使用更短、更强 KL 约束的 post-SFT update。</p>
+<h2>证据来源</h2>
+<ul><li><code>exp/sft_harpervalley_v1/eval/harpervalley/metrics.json</code></li><li><code>exp/sft+grpo_harpervalley_v1/eval/harpervalley/metrics.json</code></li><li><code>exp/sft+grpo_harpervalley_v1/eval/harpervalley/raw_outputs.jsonl</code></li><li><code>exp/sft+grpo_harpervalley_v1/pipeline.log</code></li><li><code>exp/sft_harpervalley_v1/eval/sft_comparision.html</code></li><li>背景参考：Hugging Face TRL GRPOTrainer documentation, https://huggingface.co/docs/trl/en/grpo_trainer</li><li>背景参考：DeepSeekMath GRPO paper, https://arxiv.org/abs/2402.03300</li><li>背景参考：InstructGPT/RLHF PPO paper, https://arxiv.org/abs/2203.02155</li></ul>
+</main></body>
+</html>
