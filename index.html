@@ -86,6 +86,10 @@
     .metric span { color:var(--muted); font-size:.9rem; }
     .requirement { margin-top:14px; padding:12px 14px; border-radius:14px; background:var(--amber-soft); color:#5f430a; border:1px solid #f2daa1; }
     .placeholder { margin-top:14px; padding:14px; border:1px dashed #b9c7d8; border-radius:14px; background:#f8fafc; color:var(--muted); }
+    .option-box { display:block; margin-top:14px; padding:15px; border:1px solid #cbd8ea; border-radius:16px; background:#f9fbff; color:var(--ink); text-decoration:none; }
+    .option-box:hover { border-color:#9fb7d9; transform:translateY(-1px); box-shadow:0 10px 24px rgba(49,87,213,.09); transition:.16s ease; }
+    .option-box strong { display:block; margin-bottom:3px; }
+    .option-box span { color:var(--muted); font-size:.92rem; }
     .flow { display:grid; gap:10px; margin-top:14px; }
     .step { padding:14px; border:1px solid var(--line); border-radius:14px; background:#fbfcff; }
     .step-label { color:var(--violet); font-size:.8rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
@@ -226,6 +230,10 @@
           <div class="metric"><strong>SRCC</strong><span>事件排序一致性</span></div>
         </div>
         <div class="requirement">要求：需要 GT Caption 或 rule-based 信息。</div>
+        <a class="option-box" href="caption_benchmark/tacos-200-dedup.html">
+          <strong>TACOS-200 Benchmark</strong>
+          <span>dedup subset report · Event-F1 / Segment-F1 / Hall%</span>
+        </a>
         <div class="placeholder">各类 caption 指标梳理 · 整理中</div>
       </section>
 

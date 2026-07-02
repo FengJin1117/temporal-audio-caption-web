@@ -10,6 +10,7 @@ The homepage is organized into Motivation, TODO, Speech modality solutions, and 
 
 - `plan/`: demo validation plan
 - `benchmark/`: benchmark analysis
+- `caption_benchmark/`: caption benchmark dataset and metric reports
 - `baseline/`: baseline results and inference examples
 - `grpo/`: GRPO evaluation results and representative examples
 - `sft/`: SFT experiment plan and benchmark comparison
