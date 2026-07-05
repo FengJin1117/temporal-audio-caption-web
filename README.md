@@ -4,14 +4,11 @@ Temporal audio captioning research showcase.
 
 The site is a standalone static showcase published with GitHub Pages.
 
-The homepage is organized into Motivation, TODO, Speech modality solutions, and Benchmark system sections.
+The homepage is organized into Motivation, TODO, solution tracks, and Benchmark system sections.
 
 ## Site structure
 
-- `plan/`: demo validation plan
-- `benchmark/`: benchmark analysis
+- `speech/`: Dialogue Speech Rule Reward solution track
 - `caption_benchmark/`: caption benchmark dataset and metric reports
-- `baseline/`: baseline results and inference examples
-- `grpo/`: GRPO evaluation results and representative examples
-- `sft/`: SFT experiment plan and benchmark comparison
-- `sft+grpo/`: SFT+GRPO benchmark comparison and V2 improvement plan
+- `qa_benchmark/`: Caption-QA model leaderboard reports
+- `avocado/`: Avocado audio-domain natural caption GRPO plan

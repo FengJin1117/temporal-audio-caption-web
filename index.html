@@ -62,6 +62,10 @@
     .nav-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px; }
     .nav-card { min-height:148px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; }
     .nav-card.highlight { border-color:#b8dce5; background:#f8fdfe; }
+    .solution-card { margin-top:18px; padding:22px; border:1px solid #cfe5d7; border-radius:22px; background:linear-gradient(135deg,#effaf3,#ffffff 74%); box-shadow:0 12px 34px rgba(34,118,91,.06); }
+    .solution-card .nav-card { background:#ffffff; }
+    .reserved-links { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .reserved-links span { display:inline-flex; padding:8px 12px; border-radius:999px; border:1px dashed #b9d5c4; background:#f8fcfa; color:#6a7d72; font-weight:750; font-size:.92rem; }
     .nav-title { display:block; margin-bottom:8px; color:var(--ink); font-size:1.15rem; font-weight:800; }
     .nav-desc { margin:0 0 16px; color:var(--muted); font-size:.93rem; }
     .subnav { display:flex; flex-wrap:wrap; gap:9px; }
@@ -144,7 +148,7 @@
     <div class="section-head">
       <div>
         <p class="eyebrow">Speech Modality</p>
-        <h2 id="speech-title">Speech模态解决方案：Who / What / When奖励（Rule-Based）</h2>
+        <h2 id="speech-title">Dialogue Speech Rule Reward：Who / What / When奖励（Rule-Based）</h2>
       </div>
       <p>当前 Plan、Benchmark、Baseline、GRPO、SFT 与 SFT+GRPO 都归入 speech dialogue temporal caption 的 rule-based 奖励路线。</p>
     </div>
@@ -155,7 +159,7 @@
           <span class="nav-title">Plan</span>
           <p class="nav-desc">Demo 验证计划与执行路线。</p>
         </div>
-        <div class="subnav"><a href="plan/demo_plan_v1.html">Demo Plan</a></div>
+        <div class="subnav"><a href="speech/plan/demo_plan_v1.html">Demo Plan</a></div>
       </section>
 
       <section class="nav-card">
@@ -163,7 +167,7 @@
           <span class="nav-title">Benchmark</span>
           <p class="nav-desc">HarperValley dialogue temporal caption benchmark 分析。</p>
         </div>
-        <div class="subnav"><a href="benchmark/benchmark_analysis.html">分析</a></div>
+        <div class="subnav"><a href="speech/benchmark/benchmark_analysis.html">分析</a></div>
       </section>
 
       <section class="nav-card">
@@ -172,8 +176,8 @@
           <p class="nav-desc">Qwen2.5-Omni-7B baseline 结果与原始输出样例。</p>
         </div>
         <div class="subnav">
-          <a href="baseline/RESULTS.html">成绩</a>
-          <a href="baseline/raw_outputs.html">Examples</a>
+          <a href="speech/baseline/RESULTS.html">成绩</a>
+          <a href="speech/baseline/raw_outputs.html">Examples</a>
         </div>
       </section>
 
@@ -183,9 +187,9 @@
           <p class="nav-desc">dialogue-centric speech caption 的 GRPO 提升、probe 与代表性样例。</p>
         </div>
         <div class="subnav">
-          <a href="grpo/RESULTS.html">成绩</a>
-          <a href="grpo/comparison.html">Probe</a>
-          <a href="grpo/representative_examples.html">🎉📢 Examples</a>
+          <a href="speech/grpo/RESULTS.html">成绩</a>
+          <a href="speech/grpo/comparison.html">Probe</a>
+          <a href="speech/grpo/representative_examples.html">🎉📢 Examples</a>
         </div>
       </section>
 
@@ -195,8 +199,8 @@
           <p class="nav-desc">监督拟合作为 GRPO reward 的对照实验。</p>
         </div>
         <div class="subnav">
-          <a href="sft/sft_harpervalley_v1_zh.html">Plan</a>
-          <a href="sft/sft_comparision.html">成绩</a>
+          <a href="speech/sft/sft_harpervalley_v1_zh.html">Plan</a>
+          <a href="speech/sft/sft_comparision.html">成绩</a>
         </div>
       </section>
 
@@ -206,11 +210,41 @@
           <p class="nav-desc">SFT 后继续 GRPO 的成绩与失败分析 / V2 改进方案。</p>
         </div>
         <div class="subnav">
-          <a href="sft+grpo/sft_comparision.html">成绩</a>
-          <a href="sft+grpo/GRPO_FAILURE_ANALYSIS_AND_PLAN_V2.html">改进方案</a>
+          <a href="speech/sft+grpo/sft_comparision.html">成绩</a>
+          <a href="speech/sft+grpo/GRPO_FAILURE_ANALYSIS_AND_PLAN_V2.html">改进方案</a>
         </div>
       </section>
     </nav>
+
+    <section class="solution-card" aria-labelledby="avocado-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Second Track</p>
+          <h2 id="avocado-title">🥑 Avocado：Audio-Domain Natural Caption GRPO</h2>
+        </div>
+        <p>面向 speech、sound、music 的自然语言 caption 训练与 GRPO 路线，补齐通用音频域的信息覆盖与真实性约束。</p>
+      </div>
+      <div class="nav-grid">
+        <section class="nav-card">
+          <div>
+            <span class="nav-title">计划</span>
+            <p class="nav-desc">Avocado-inspired general audio caption GRPO 训练方案。</p>
+          </div>
+          <div class="subnav"><a href="avocado/avocado_audio_grpo_plan.html">查看计划</a></div>
+        </section>
+        <section class="nav-card">
+          <div>
+            <span class="nav-title">后续模块</span>
+            <p class="nav-desc">预留 baseline base case、数据制造与 GRPO 成绩位置。</p>
+          </div>
+          <div class="reserved-links">
+            <span>Baseline Base Case · 待补充</span>
+            <span>训练集数据制造 · 待补充</span>
+            <span>GRPO 成绩 · 待补充</span>
+          </div>
+        </section>
+      </div>
+    </section>
   </section>
 
   <section class="section benchmark" aria-labelledby="benchmark-title">
@@ -258,6 +292,10 @@
           </div>
         </div>
         <div class="insight">💡 Insight：好的 Caption 会详细真实地描述 audio 信息，LLM 回答的准确率越高。</div>
+        <a class="option-box" href="qa_benchmark/model_caption_qa_comparison.html">
+          <strong>模型榜单成绩</strong>
+          <span>Baseline Caption-QA Model Comparison · MMAU / MMSU / MMAR</span>
+        </a>
       </section>
     </div>
   </section>
