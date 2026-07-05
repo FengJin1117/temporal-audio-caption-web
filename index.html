@@ -56,14 +56,13 @@
     .tag { display:inline-flex; align-items:center; width:max-content; margin-top:10px; padding:5px 10px; border-radius:999px; background:#ffffffb8; color:var(--muted); border:1px solid var(--line); font-size:.86rem; font-weight:700; }
     .section { margin-top:18px; padding:28px; }
     .section.speech { background:linear-gradient(135deg, var(--cyan-soft), #fff 58%); }
+    .section.avocado { background:linear-gradient(135deg,#effaf3,#fff 62%); }
     .section.benchmark { background:linear-gradient(135deg, var(--violet-soft), #fff 58%); }
     .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
     .section-head p { max-width:620px; margin:0; color:var(--muted); }
     .nav-grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px; }
     .nav-card { min-height:148px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; }
     .nav-card.highlight { border-color:#b8dce5; background:#f8fdfe; }
-    .solution-card { margin-top:18px; padding:22px; border:1px solid #cfe5d7; border-radius:22px; background:linear-gradient(135deg,#effaf3,#ffffff 74%); box-shadow:0 12px 34px rgba(34,118,91,.06); }
-    .solution-card .nav-card { background:#ffffff; }
     .reserved-links { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
     .reserved-links span { display:inline-flex; padding:8px 12px; border-radius:999px; border:1px dashed #b9d5c4; background:#f8fcfa; color:#6a7d72; font-weight:750; font-size:.92rem; }
     .nav-title { display:block; margin-bottom:8px; color:var(--ink); font-size:1.15rem; font-weight:800; }
@@ -216,35 +215,36 @@
       </section>
     </nav>
 
-    <section class="solution-card" aria-labelledby="avocado-title">
-      <div class="section-head">
+  </section>
+
+  <section class="section avocado" aria-labelledby="avocado-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Audio-Domain Solution</p>
+        <h2 id="avocado-title">🥑 Avocado：Audio-Domain Natural Caption GRPO</h2>
+      </div>
+      <p>与 ORCA 和 Benchmark 体系并列的第二条方案：面向 speech、sound、music 的自然语言 caption 训练与 GRPO 路线。</p>
+    </div>
+    <div class="nav-grid">
+      <section class="nav-card">
         <div>
-          <p class="eyebrow">Second Track</p>
-          <h2 id="avocado-title">🥑 Avocado：Audio-Domain Natural Caption GRPO</h2>
+          <span class="nav-title">计划</span>
+          <p class="nav-desc">Avocado-inspired general audio caption GRPO 训练方案。</p>
         </div>
-        <p>面向 speech、sound、music 的自然语言 caption 训练与 GRPO 路线，补齐通用音频域的信息覆盖与真实性约束。</p>
-      </div>
-      <div class="nav-grid">
-        <section class="nav-card">
-          <div>
-            <span class="nav-title">计划</span>
-            <p class="nav-desc">Avocado-inspired general audio caption GRPO 训练方案。</p>
-          </div>
-          <div class="subnav"><a href="avocado/avocado_audio_grpo_plan.html">查看计划</a></div>
-        </section>
-        <section class="nav-card">
-          <div>
-            <span class="nav-title">后续模块</span>
-            <p class="nav-desc">预留 baseline base case、数据制造与 GRPO 成绩位置。</p>
-          </div>
-          <div class="reserved-links">
-            <span>Baseline Base Case · 待补充</span>
-            <span>训练集数据制造 · 待补充</span>
-            <span>GRPO 成绩 · 待补充</span>
-          </div>
-        </section>
-      </div>
-    </section>
+        <div class="subnav"><a href="avocado/avocado_audio_grpo_plan.html">查看计划</a></div>
+      </section>
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">后续模块</span>
+          <p class="nav-desc">预留 baseline base case、数据制造与 GRPO 成绩位置。</p>
+        </div>
+        <div class="reserved-links">
+          <span>Baseline Base Case · 待补充</span>
+          <span>训练集数据制造 · 待补充</span>
+          <span>GRPO 成绩 · 待补充</span>
+        </div>
+      </section>
+    </div>
   </section>
 
   <section class="section benchmark" aria-labelledby="benchmark-title">
