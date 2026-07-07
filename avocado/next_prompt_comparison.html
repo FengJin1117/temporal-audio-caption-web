@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next Prompt Comparison</title>
+<style>
+:root { color-scheme: light; --ink:#18212f; --muted:#5f6b7a; --line:#dce3ea; --panel:#f6f8fb; --accent:#3157d5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#eef2f6; color:var(--ink); font:16px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { width:min(1040px,calc(100% - 32px)); margin:32px auto; padding:48px 56px 64px; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 12px 35px rgba(31,45,61,.08); }
+h1 { margin:0 0 28px; font-size:2.15rem; line-height:1.2; letter-spacing:-.03em; }
+h2 { margin:42px 0 16px; padding-bottom:8px; border-bottom:1px solid var(--line); font-size:1.4rem; }
+h3 { margin:30px 0 10px; font-size:1.08rem; }
+p { margin:12px 0; }
+h2 + p strong { display:inline-block; padding:14px 20px; border-radius:12px; color:#17368d; background:#edf2ff; font-size:1.35rem; }
+ul { margin:12px 0; padding-left:1.4rem; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:16px 0 22px; border:1px solid var(--line); border-radius:10px; }
+table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+th,td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; }
+th { background:var(--panel); color:var(--muted); font-size:.82rem; letter-spacing:.04em; text-transform:uppercase; }
+td:last-child,th:last-child { text-align:right; }
+tbody tr:last-child td { border-bottom:0; }
+code { padding:.12em .35em; border-radius:5px; background:#eef1f5; font:0.9em ui-monospace,SFMono-Regular,Menlo,monospace; }
+pre { overflow:auto; margin:14px 0 22px; padding:18px; border:1px solid #293443; border-radius:10px; background:#111827; color:#e5edf6; line-height:1.5; }
+pre code { padding:0; background:none; color:inherit; white-space:pre-wrap; overflow-wrap:anywhere; }
+strong { font-weight:700; }
+.prompt-note { padding:14px 18px; border:1px solid #bfe4cd; border-radius:10px; background:#f1fbf5; color:#21573d; font-weight:700; }
+.prompt-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.prompt-grid h3 { margin-top:0; }
+@media (max-width:700px) { main { width:100%; margin:0; padding:28px 20px 48px; border:0; border-radius:0; } h1 { font-size:1.7rem; } }
+@media (max-width:900px) { .prompt-grid { grid-template-columns:1fr; } }
+@media print { body { background:white; } main { width:100%; margin:0; padding:0; border:0; box-shadow:none; } }
+</style>
+</head>
+<body><main>
+<h1>Next Prompt Comparison</h1>
+<h2>Overall</h2>
+<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Max tokens</th><th>Coverage</th><th>Answered acc.</th><th>Accuracy all</th><th>Wrong-answer</th><th>Length finish</th><th>Token mean</th><th>Token p90</th></tr></thead><tbody><tr><td>baseline</td><td></td><td>27.22%</td><td>40.82%</td><td>11.11%</td><td>16.11%</td><td>3.89%</td><td>79.73</td><td>131</td></tr><tr><td>general_audio_caption_v2</td><td>256</td><td>27.78%</td><td>54.00%</td><td>15.00%</td><td>12.78%</td><td>1.11%</td><td>104.85</td><td>138</td></tr><tr><td>general_audio_caption_v2_expansive</td><td>256</td><td>33.89%</td><td>63.93%</td><td>21.67%</td><td>12.22%</td><td>0.00%</td><td>114.29</td><td>141</td></tr><tr><td>general_audio_caption_v2_384</td><td>384</td><td>27.78%</td><td>54.00%</td><td>15.00%</td><td>12.78%</td><td>1.11%</td><td>106.27</td><td>138</td></tr></tbody></table></div>
+<h2>Benchmarks</h2>
+<h3>MMAU</h3>
+<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Max tokens</th><th>Coverage</th><th>Answered acc.</th><th>Accuracy all</th><th>Wrong-answer</th><th>Length finish</th><th>Token mean</th><th>Token p90</th></tr></thead><tbody><tr><td>general_audio_caption_v2</td><td>256</td><td>25.00%</td><td>60.00%</td><td>15.00%</td><td>10.00%</td><td>3.33%</td><td>107.57</td><td>130</td></tr><tr><td>general_audio_caption_v2_expansive</td><td>256</td><td>38.33%</td><td>56.52%</td><td>21.67%</td><td>16.67%</td><td>0.00%</td><td>113.97</td><td>136</td></tr><tr><td>general_audio_caption_v2_384</td><td>384</td><td>25.00%</td><td>60.00%</td><td>15.00%</td><td>10.00%</td><td>3.33%</td><td>111.83</td><td>130</td></tr></tbody></table></div>
+<h3>MMSU</h3>
+<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Max tokens</th><th>Coverage</th><th>Answered acc.</th><th>Accuracy all</th><th>Wrong-answer</th><th>Length finish</th><th>Token mean</th><th>Token p90</th></tr></thead><tbody><tr><td>general_audio_caption_v2</td><td>256</td><td>41.67%</td><td>56.00%</td><td>23.33%</td><td>18.33%</td><td>0.00%</td><td>90.92</td><td>120</td></tr><tr><td>general_audio_caption_v2_expansive</td><td>256</td><td>43.33%</td><td>73.08%</td><td>31.67%</td><td>11.67%</td><td>0.00%</td><td>105.28</td><td>133</td></tr><tr><td>general_audio_caption_v2_384</td><td>384</td><td>41.67%</td><td>56.00%</td><td>23.33%</td><td>18.33%</td><td>0.00%</td><td>90.92</td><td>120</td></tr></tbody></table></div>
+<h3>MMAR</h3>
+<div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Max tokens</th><th>Coverage</th><th>Answered acc.</th><th>Accuracy all</th><th>Wrong-answer</th><th>Length finish</th><th>Token mean</th><th>Token p90</th></tr></thead><tbody><tr><td>general_audio_caption_v2</td><td>256</td><td>16.67%</td><td>40.00%</td><td>6.67%</td><td>10.00%</td><td>0.00%</td><td>116.07</td><td>145</td></tr><tr><td>general_audio_caption_v2_expansive</td><td>256</td><td>20.00%</td><td>58.33%</td><td>11.67%</td><td>8.33%</td><td>0.00%</td><td>123.62</td><td>152</td></tr><tr><td>general_audio_caption_v2_384</td><td>384</td><td>16.67%</td><td>40.00%</td><td>6.67%</td><td>10.00%</td><td>0.00%</td><td>116.07</td><td>145</td></tr></tbody></table></div>
+<h2>Candidates</h2>
+<ul><li><code>general_audio_caption_v2</code>: <code>exp/grpo_avocado_v1/prompt_ablation/general_audio_caption_v2/comparison.json</code></li><li><code>general_audio_caption_v2_expansive</code>: <code>exp/grpo_avocado_v1/prompt_ablation/general_audio_caption_v2_expansive/comparison.json</code></li><li><code>general_audio_caption_v2_384</code>: <code>exp/grpo_avocado_v1/prompt_ablation/general_audio_caption_v2_384/comparison.json</code></li></ul>
+<h2>Best Caption Prompt</h2>
+<p class="prompt-note"><code>prompts/general_audio_caption_v2_expansive.txt</code> is the current best caption prompt in this smoke ablation: it gives the best overall coverage, answered accuracy, all-sample accuracy, wrong-answer rate, and length-finish rate among tested candidates.</p>
+<div class="prompt-grid">
+<section>
+<h3>English Prompt</h3>
+<pre><code>Listen carefully to the provided audio and write an evidence-rich natural-language caption for downstream audio question answering.
+
+Your priority is to preserve all audible clues that could help answer questions. Be more complete than a generic caption, but stay faithful to what can be heard.
+
+Include audible evidence when present:
+- Speech: number of speakers when discernible, speaking order, language, quoted or closely paraphrased key words, names, numbers, repeated phrases, interaction pattern, emotional/prosodic changes, laughter, hesitation, overlap, and relative loudness or distance changes.
+- Music: vocals versus instruments, identifiable instruments, rhythm, tempo, style-like qualities, mood, chord or melody movement only when clearly audible, and changes over time.
+- Sound events: source-like descriptions, event order, repeated counts or rhythm, intensity, foreground/background placement, overlap with speech or music, and changes in loudness, distance, or texture.
+- Acoustic scene: room/reverb/noise/crowd/traffic/outdoor cues, device or recording artifacts, and other background evidence.
+
+When the audio suggests a cue but does not prove it, use calibrated wording such as "sounds like", "appears to", "possibly", "a higher/lower-pitched voice", "nearer/farther-sounding", or "not clearly audible". Do not make unsupported claims about identity, profession, exact age, gender, nationality, culture, price, visual action, location, or exact music theory function. If a likely question would require visual-only or non-audible evidence, make the audible evidence gap clear in natural language instead of guessing.
+
+Write one information-dense paragraph of about 120-180 words when the clip has enough content; use fewer words for simple clips. Avoid repeating the same lyric, laugh, sound, or phrase unless the repetition itself is important. Do not output JSON, bullet lists, timestamps, or &lt;answer&gt; tags.</code></pre>
+</section>
+<section>
+<h3>中文翻译</h3>
+<pre><code>请仔细聆听给定音频，并写出一段证据充分的自然语言 caption，用于下游音频问答。
+
+你的首要任务是保留所有可能帮助回答问题的可听线索。请比普通概括式 caption 更完整，但必须忠实于实际能听到的内容。
+
+如果音频中存在，请包含以下可听证据：
+- 语音：可辨别时写出说话人数、说话顺序、语言、关键字词的直接引用或近似转述、人名、数字、重复短语、互动模式、情绪或韵律变化、笑声、迟疑、重叠说话，以及相对响度或距离变化。
+- 音乐：人声与器乐的区分、可识别乐器、节奏、速度、风格化特征、情绪、只有在清楚可听时才描述和弦或旋律走向，以及随时间发生的变化。
+- 声音事件：类似声源的描述、事件顺序、重复次数或节奏、强度、前景/背景位置、是否与语音或音乐重叠，以及响度、距离或质感变化。
+- 声学场景：房间感、混响、噪声、人群、交通、户外线索、设备或录音瑕疵，以及其他背景证据。
+
+当音频暗示某个线索但不能证明时，请使用校准性措辞，例如“听起来像”“似乎”“可能”“较高/较低音高的声音”“听起来更近/更远”或“听不清”。不要对身份、职业、精确年龄、性别、国籍、文化、价格、视觉动作、地点或精确乐理功能做无证据断言。如果某个可能的问题需要视觉信息或音频中不可听的信息，请用自然语言明确说明可听证据缺口，而不是猜测。
+
+当片段内容足够丰富时，写一段约 120-180 个英文词的信息密集段落；简单片段可更短。除非重复本身很重要，否则避免重复同一句歌词、笑声、声音或短语。不要输出 JSON、项目符号、时间戳或 &lt;answer&gt; 标签。</code></pre>
+</section>
+</div>
+</main></body>
+</html>

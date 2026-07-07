@@ -101,6 +101,14 @@
     .step { padding:14px; border:1px solid var(--line); border-radius:14px; background:#fbfcff; }
     .step-label { color:var(--violet); font-size:.8rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
     .insight { margin-top:14px; padding:14px; border-radius:14px; background:#f7f3ff; color:#4f3ca1; border:1px solid #ded4ff; font-weight:700; }
+    .prompt-showcase { margin-top:16px; padding:20px; border:1px solid #bfe4cd; border-radius:18px; background:#f6fcf8; }
+    .prompt-showcase-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:12px; }
+    .prompt-showcase-head p { margin:4px 0 0; color:var(--muted); }
+    .prompt-badge { display:inline-flex; white-space:nowrap; padding:6px 10px; border-radius:999px; background:#e4f8eb; color:#1f6846; border:1px solid #b9e4c8; font-weight:850; font-size:.86rem; }
+    .prompt-details { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    details.prompt-box { border:1px solid #cfe2d7; border-radius:14px; background:#fff; }
+    details.prompt-box summary { cursor:pointer; padding:12px 14px; color:#1f6846; font-weight:850; }
+    details.prompt-box pre { margin:0; padding:0 14px 14px; white-space:pre-wrap; overflow-wrap:anywhere; color:#334155; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
     a:focus-visible { outline:3px solid #8fc7d6; outline-offset:4px; }
     @media (max-width:980px) {
       .overview, .benchmark-grid { grid-template-columns:1fr; }
@@ -111,6 +119,9 @@
       .hero, .panel, .section { padding:22px; border-radius:20px; }
       .section-head { display:block; }
       .nav-grid, .metric-list { grid-template-columns:1fr; }
+      .prompt-showcase-head { display:block; }
+      .prompt-badge { margin-top:8px; }
+      .prompt-details { grid-template-columns:1fr; }
       .nav-card { min-height:128px; }
     }
   </style>
@@ -244,15 +255,60 @@
       <section class="nav-card">
         <div>
           <span class="nav-title">后续模块</span>
-          <p class="nav-desc">预留 baseline base case、数据制造与 GRPO 成绩位置。</p>
+          <p class="nav-desc">预留数据制造与 GRPO 成绩位置。</p>
         </div>
         <div class="reserved-links">
-          <span>Baseline Base Case · 待补充</span>
           <span>训练集数据制造 · 待补充</span>
           <span>GRPO 成绩 · 待补充</span>
         </div>
       </section>
     </div>
+    <section class="prompt-showcase" aria-labelledby="avocado-prompt-title">
+      <div class="prompt-showcase-head">
+        <div>
+          <h3 id="avocado-prompt-title">当前最佳 Caption Prompt：general_audio_caption_v2_expansive</h3>
+          <p>来自 Avocado prompt ablation：相同 180 条 smoke 样本上，coverage、answered accuracy、all-sample accuracy、wrong-answer 与 length finish 综合最好。</p>
+        </div>
+        <span class="prompt-badge">Best current caption prompt</span>
+      </div>
+      <div class="subnav">
+        <a href="avocado/next_prompt_comparison.html">查看 Prompt Ablation 与完整 Prompt</a>
+      </div>
+      <div class="prompt-details">
+        <details class="prompt-box">
+          <summary>English prompt</summary>
+          <pre>Listen carefully to the provided audio and write an evidence-rich natural-language caption for downstream audio question answering.
+
+Your priority is to preserve all audible clues that could help answer questions. Be more complete than a generic caption, but stay faithful to what can be heard.
+
+Include audible evidence when present:
+- Speech: number of speakers when discernible, speaking order, language, quoted or closely paraphrased key words, names, numbers, repeated phrases, interaction pattern, emotional/prosodic changes, laughter, hesitation, overlap, and relative loudness or distance changes.
+- Music: vocals versus instruments, identifiable instruments, rhythm, tempo, style-like qualities, mood, chord or melody movement only when clearly audible, and changes over time.
+- Sound events: source-like descriptions, event order, repeated counts or rhythm, intensity, foreground/background placement, overlap with speech or music, and changes in loudness, distance, or texture.
+- Acoustic scene: room/reverb/noise/crowd/traffic/outdoor cues, device or recording artifacts, and other background evidence.
+
+When the audio suggests a cue but does not prove it, use calibrated wording such as "sounds like", "appears to", "possibly", "a higher/lower-pitched voice", "nearer/farther-sounding", or "not clearly audible". Do not make unsupported claims about identity, profession, exact age, gender, nationality, culture, price, visual action, location, or exact music theory function. If a likely question would require visual-only or non-audible evidence, make the audible evidence gap clear in natural language instead of guessing.
+
+Write one information-dense paragraph of about 120-180 words when the clip has enough content; use fewer words for simple clips. Avoid repeating the same lyric, laugh, sound, or phrase unless the repetition itself is important. Do not output JSON, bullet lists, timestamps, or &lt;answer&gt; tags.</pre>
+        </details>
+        <details class="prompt-box">
+          <summary>中文翻译</summary>
+          <pre>请仔细聆听给定音频，并写出一段证据充分的自然语言 caption，用于下游音频问答。
+
+你的首要任务是保留所有可能帮助回答问题的可听线索。请比普通概括式 caption 更完整，但必须忠实于实际能听到的内容。
+
+如果音频中存在，请包含以下可听证据：
+- 语音：可辨别时写出说话人数、说话顺序、语言、关键字词的直接引用或近似转述、人名、数字、重复短语、互动模式、情绪或韵律变化、笑声、迟疑、重叠说话，以及相对响度或距离变化。
+- 音乐：人声与器乐的区分、可识别乐器、节奏、速度、风格化特征、情绪、只有在清楚可听时才描述和弦或旋律走向，以及随时间发生的变化。
+- 声音事件：类似声源的描述、事件顺序、重复次数或节奏、强度、前景/背景位置、是否与语音或音乐重叠，以及响度、距离或质感变化。
+- 声学场景：房间感、混响、噪声、人群、交通、户外线索、设备或录音瑕疵，以及其他背景证据。
+
+当音频暗示某个线索但不能证明时，请使用校准性措辞，例如“听起来像”“似乎”“可能”“较高/较低音高的声音”“听起来更近/更远”或“听不清”。不要对身份、职业、精确年龄、性别、国籍、文化、价格、视觉动作、地点或精确乐理功能做无证据断言。如果某个可能的问题需要视觉信息或音频中不可听的信息，请用自然语言明确说明可听证据缺口，而不是猜测。
+
+当片段内容足够丰富时，写一段约 120-180 个英文词的信息密集段落；简单片段可更短。除非重复本身很重要，否则避免重复同一句歌词、笑声、声音或短语。不要输出 JSON、项目符号、时间戳或 &lt;answer&gt; 标签。</pre>
+        </details>
+      </div>
+    </section>
   </section>
 
   <section class="section benchmark" aria-labelledby="benchmark-title">
