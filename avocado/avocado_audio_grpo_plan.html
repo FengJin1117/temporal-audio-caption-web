@@ -155,6 +155,45 @@
     .p1 { color: #fff; background: var(--amber); }
     .p2 { color: #fff; background: var(--blue); }
     .p3 { color: #fff; background: var(--green); }
+    .failure-chart {
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+    .failure-chart h3 { margin-bottom: 12px; }
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) 72px;
+      gap: 10px;
+      align-items: center;
+    }
+    .bar-label {
+      color: #263a55;
+      font-weight: 700;
+    }
+    .bar-track {
+      height: 14px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8eef6;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--red), var(--amber));
+    }
+    .bar-value {
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
     .callout {
       padding: 15px 16px;
       border-left: 4px solid var(--blue);
@@ -226,6 +265,8 @@
       h1 { font-size: 34px; }
       section { padding: 18px; }
       .decision { grid-template-columns: 1fr; gap: 4px; }
+      .bar-row { grid-template-columns: 1fr 64px; }
+      .bar-label { grid-column: 1 / -1; }
       table { display: block; overflow-x: auto; }
     }
   </style>
@@ -270,52 +311,74 @@
     <section>
       <h2>已有 Caption-QA 诊断</h2>
       <p class="muted">数据来自 <code>exp/baseline/model_caption_qa_comparison.html</code> 及 Qwen2.5-Omni-7B 的 <code>qa_results.json</code>/<code>raw_outputs.jsonl</code>。拒答样本是首要可改进空间；答错样本和 length finish 是需要用 precision、repetition 与 length gate 控制的风险。</p>
+      <h3>Failure Rates</h3>
       <table>
         <thead>
           <tr>
             <th>Benchmark</th>
             <th class="num">Accuracy</th>
-            <th class="num">Answered / Coverage</th>
-            <th class="num">Answered Acc.</th>
-            <th class="num">Abstain</th>
-            <th class="num">Wrong Answer</th>
-            <th class="num">Length Finish</th>
-            <th class="num">Token Mean / P90</th>
+            <th class="num">Coverage</th>
+            <th class="num">Missing</th>
+            <th class="num">Hallucination</th>
+            <th class="num">Repetition</th>
+            <th class="num">Length</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>MMAU</td>
             <td class="num">39.10%</td>
-            <td class="num">499 / 49.90%</td>
-            <td class="num">78.36%</td>
-            <td class="num">501/1000</td>
-            <td class="num">108/1000</td>
-            <td class="num">38/1000</td>
-            <td class="num">78.2 / 124</td>
+            <td class="num">49.90%</td>
+            <td class="num">501/1000 (50.10%)</td>
+            <td class="num">108/1000 (10.80%)</td>
+            <td class="num">74/1000 (7.40%)</td>
+            <td class="num">38/1000 (3.80%)</td>
           </tr>
           <tr>
             <td>MMSU</td>
             <td class="num">44.40%</td>
-            <td class="num">618 / 61.80%</td>
-            <td class="num">71.84%</td>
-            <td class="num">382/1000</td>
-            <td class="num">174/1000</td>
-            <td class="num">2/1000</td>
-            <td class="num">58.8 / 99</td>
+            <td class="num">61.80%</td>
+            <td class="num">382/1000 (38.20%)</td>
+            <td class="num">174/1000 (17.40%)</td>
+            <td class="num">15/1000 (1.50%)</td>
+            <td class="num">2/1000 (0.20%)</td>
           </tr>
           <tr>
             <td>MMAR</td>
             <td class="num">18.80%</td>
-            <td class="num">292 / 29.20%</td>
-            <td class="num">64.38%</td>
-            <td class="num">708/1000</td>
-            <td class="num">104/1000</td>
-            <td class="num">63/1000</td>
-            <td class="num">95.0 / 158</td>
+            <td class="num">29.20%</td>
+            <td class="num">708/1000 (70.80%)</td>
+            <td class="num">104/1000 (10.40%)</td>
+            <td class="num">117/1000 (11.70%)</td>
+            <td class="num">63/1000 (6.30%)</td>
           </tr>
         </tbody>
       </table>
+      <div class="failure-chart" aria-label="错误率排行">
+        <h3>出错率排行</h3>
+        <div class="bar-list">
+          <div class="bar-row">
+            <div class="bar-label">Missing</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+            <div class="bar-value">53.03%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Hallucination</div>
+            <div class="bar-track"><div class="bar-fill" style="width:24.26%"></div></div>
+            <div class="bar-value">12.87%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Repetition</div>
+            <div class="bar-track"><div class="bar-fill" style="width:12.95%"></div></div>
+            <div class="bar-value">6.87%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Length</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6.47%"></div></div>
+            <div class="bar-value">3.43%</div>
+          </div>
+        </div>
+      </div>
       <div class="callout" style="margin-top:14px">
         <strong>Reward implication:</strong>
         新 reward 不能继续只奖励“更严格”。它要奖励可验证的信息补全：提高 event/keypoint recall 与 QA utility，同时用 claim precision、unsupported-claim penalty 和 repetition gate 防止模型为了覆盖率而乱猜。
