@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SFT+GRPO 增益有限：一次更有价值的失败复盘</title>
+<style>
+:root {
+  color-scheme: light;
+  --ink: #152033;
+  --muted: #5f6978;
+  --line: #dfe5ee;
+  --paper: #fbfcfe;
+  --panel: #ffffff;
+  --accent: #1f6f78;
+  --accent-2: #d04f2f;
+  --good: #14745a;
+  --bad: #b64a38;
+  --soft-good: #e8f5f0;
+  --soft-bad: #fff0eb;
+  --soft-accent: #eaf4f5;
+}
+* { box-sizing: border-box; }
+html { background: #edf1f5; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, rgba(31,111,120,.08), transparent 32rem),
+    linear-gradient(315deg, rgba(208,79,47,.08), transparent 28rem),
+    #edf1f5;
+  font: 16px/1.72 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+}
+main {
+  width: min(1120px, calc(100% - 32px));
+  margin: 32px auto 56px;
+  background: var(--paper);
+  border: 1px solid rgba(21,32,51,.08);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(31,45,61,.13);
+  overflow: hidden;
+}
+.hero {
+  padding: 46px 52px 34px;
+  background:
+    linear-gradient(135deg, rgba(31,111,120,.95), rgba(21,32,51,.96)),
+    #152033;
+  color: #fff;
+}
+.eyebrow {
+  margin: 0 0 12px;
+  color: rgba(255,255,255,.75);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+h1 {
+  max-width: 900px;
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4.6rem);
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+.hero .lead {
+  max-width: 850px;
+  margin: 22px 0 0;
+  color: rgba(255,255,255,.86);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+}
+.hero strong { color: #fff; }
+.hero-metric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 8px;
+  background: rgba(255,255,255,.1);
+}
+.hero-metric b { font-size: clamp(2.2rem, 5vw, 4rem); line-height: 1; }
+.hero-metric span { color: rgba(255,255,255,.76); }
+.content { padding: 34px 52px 56px; }
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 30px;
+}
+.metric-card {
+  min-height: 158px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(31,45,61,.05);
+}
+.metric-card h2 {
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  color: var(--muted);
+  font-size: .86rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.metric-card .value {
+  margin: 0;
+  color: var(--ink);
+  font-size: 2.35rem;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.metric-card .delta {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: .9rem;
+  font-weight: 800;
+}
+.delta.good { color: var(--good); background: var(--soft-good); }
+.delta.bad { color: var(--bad); background: var(--soft-bad); }
+.callout {
+  margin: 28px 0 34px;
+  padding: 22px 24px;
+  border-left: 5px solid var(--accent-2);
+  border-radius: 8px;
+  background: #fff8f5;
+  box-shadow: 0 10px 26px rgba(208,79,47,.08);
+}
+.callout p { margin: 0; font-size: 1.12rem; }
+section {
+  margin-top: 40px;
+  padding-top: 34px;
+  border-top: 1px solid var(--line);
+}
+section:first-of-type { margin-top: 0; }
+h2 {
+  margin: 0 0 14px;
+  color: #111a2a;
+  font-size: clamp(1.45rem, 2.5vw, 2.05rem);
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+h3 {
+  margin: 26px 0 8px;
+  font-size: 1.08rem;
+}
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0; padding-left: 1.35rem; }
+li { margin: 7px 0; }
+strong { font-weight: 800; }
+code {
+  padding: .12em .35em;
+  border-radius: 5px;
+  background: #eef2f6;
+  color: #172033;
+  font: .9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.note {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.note strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+.table-wrap {
+  overflow-x: auto;
+  margin: 18px 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: #f2f6f8;
+  color: #435063;
+  font-size: .82rem;
+  font-weight: 800;
+}
+td:not(:first-child), th:not(:first-child) { text-align: right; }
+tbody tr:last-child td { border-bottom: 0; }
+.text-table td:not(:first-child), .text-table th:not(:first-child) { text-align: left; }
+.pos { color: var(--good); font-weight: 800; }
+.neg { color: var(--bad); font-weight: 800; }
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--soft-accent);
+  color: var(--accent);
+  font-weight: 800;
+}
+.bottom-line {
+  margin-top: 36px;
+  padding: 26px;
+  border-radius: 8px;
+  background: #142033;
+  color: #f7fbff;
+}
+.bottom-line h2 { color: #fff; }
+.bottom-line p { color: rgba(255,255,255,.86); }
+.home-link {
+  display: inline-flex;
+  margin: 20px 52px 0;
+  color: var(--accent);
+  font-weight: 800;
+  text-decoration: none;
+}
+.home-link:hover { text-decoration: underline; }
+.evidence {
+  columns: 2;
+  column-gap: 28px;
+  padding-left: 1.15rem;
+}
+@media (max-width: 860px) {
+  main { width: 100%; margin: 0; border: 0; border-radius: 0; }
+  .hero, .content { padding-left: 22px; padding-right: 22px; }
+  .home-link { margin-left: 22px; margin-right: 22px; }
+  .metric-grid, .split { grid-template-columns: 1fr; }
+  .metric-card { min-height: 0; }
+  .evidence { columns: 1; }
+  table { min-width: 620px; }
+}
+@media print {
+  body { background: #fff; }
+  main { width: 100%; margin: 0; border: 0; box-shadow: none; }
+  .hero { background: #152033; }
+}
+</style>
+</head>
+<body>
+<main>
+  <a class="home-link" href="../../index.html">← 返回首页</a>
+  <header class="hero">
+    <p class="eyebrow">SFT+GRPO speech-only 复盘</p>
+    <h1>不是崩盘，是只剩很薄的一层增益</h1>
+    <p class="lead">HarperValley 从 <strong>86.71</strong> 到 <strong>87.03</strong>，格式、复读、turn 数都稳住了；但下游 MMAU/MMSU 各少答对 1 题。这个结果最值得讲的，不是“GRPO 没用”，而是“什么时候 GRPO 只会做局部修正”。</p>
+    <div class="hero-metric"><b>+0.32</b><span>HarperValley overall 相对 SFT 的增益</span></div>
+  </header>
+
+  <div class="content">
+    <div class="metric-grid" aria-label="关键结果">
+      <article class="metric-card">
+        <h2>HarperValley</h2>
+        <p class="value">87.03</p>
+        <span class="delta good">+0.32 vs SFT</span>
+      </article>
+      <article class="metric-card">
+        <h2>MMAU speech</h2>
+        <p class="value">46.55</p>
+        <span class="delta bad">-0.30 vs SFT</span>
+      </article>
+      <article class="metric-card">
+        <h2>MMSU split</h2>
+        <p class="value">39.00</p>
+        <span class="delta bad">-0.20 vs SFT</span>
+      </article>
+    </div>
+
+    <div class="callout">
+      <p><strong>核心教训：</strong>当前 GRPO 没把模型训坏；它只是围绕一个已经很强的 SFT checkpoint 做了局部优化。要让 GRPO 明显发挥，需要换更有区分度的数据、奖励，或任务形式。</p>
+    </div>
+
+    <section>
+      <h2>发生了什么</h2>
+      <p>域内提升是真实的，但分布得很薄：9 个 HarperValley 样本提升超过 0.5 分，3 个下降超过 0.5 分，88 个基本不变。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>基准</th><th>baseline</th><th>SFT</th><th>SFT+GRPO</th><th>SFT+GRPO - SFT</th></tr></thead>
+          <tbody>
+            <tr><td>HarperValley overall</td><td>61.14</td><td>86.71</td><td>87.03</td><td class="pos">+0.32</td></tr>
+            <tr><td>MMAU speech acc.</td><td>20.12</td><td>46.85</td><td>46.55</td><td class="neg">-0.30</td></tr>
+            <tr><td>MMSU split acc.</td><td>34.00</td><td>39.20</td><td>39.00</td><td class="neg">-0.20</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>HarperValley 指标</th><th>SFT</th><th>SFT+GRPO</th><th>变化</th></tr></thead>
+          <tbody>
+            <tr><td>格式通过率</td><td>100.00</td><td>100.00</td><td>+0.00</td></tr>
+            <tr><td>Turn Precision</td><td>91.18</td><td>91.46</td><td class="pos">+0.27</td></tr>
+            <tr><td>Turn Recall</td><td>90.50</td><td>91.00</td><td class="pos">+0.50</td></tr>
+            <tr><td>Turn F1</td><td>90.84</td><td>91.23</td><td class="pos">+0.39</td></tr>
+            <tr><td>Speaker Accuracy</td><td>95.30</td><td>95.33</td><td class="pos">+0.03</td></tr>
+            <tr><td>WER（越低越好）</td><td>8.28</td><td>8.15</td><td class="pos">-0.13</td></tr>
+            <tr><td>Temporal IoU</td><td>68.99</td><td>69.71</td><td class="pos">+0.72</td></tr>
+            <tr><td>Order Accuracy</td><td>97.00</td><td>97.00</td><td>+0.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>为什么不是 80 steps 的锅</h2>
+      <p>80 steps 可能不是最优，但不像主因。reward 很早就高，KL 极小，reward variance 没塌；同一个 schedule 继续训，大概率只是继续做局部修正。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>训练窗口</th><th>reward</th><th>reward_std</th><th>KL</th><th>格式有效</th><th>复读率</th><th>预测 turns</th><th>参考 turns</th><th>recall</th><th>precision</th></tr></thead>
+          <tbody>
+            <tr><td>steps 1-10</td><td>0.871</td><td>0.061</td><td>0.000039</td><td>0.994</td><td>0.003</td><td>4.12</td><td>4.06</td><td>0.930</td><td>0.916</td></tr>
+            <tr><td>steps 11-40</td><td>0.861</td><td>0.062</td><td>0.000083</td><td>0.999</td><td>0.001</td><td>3.97</td><td>3.92</td><td>0.916</td><td>0.908</td></tr>
+            <tr><td>steps 41-60</td><td>0.900</td><td>0.049</td><td>0.000123</td><td>1.000</td><td>0.002</td><td>4.02</td><td>3.91</td><td>0.956</td><td>0.930</td></tr>
+            <tr><td>steps 61-80</td><td>0.881</td><td>0.051</td><td>0.000180</td><td>1.000</td><td>0.000</td><td>4.18</td><td>4.14</td><td>0.937</td><td>0.930</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="split">
+        <div class="note"><strong>有相对信号</strong><code>reward_std &lt; 0.01</code> 出现 <code>0/80</code> 次，说明 GRPO 不是完全没有组内区分度。</div>
+        <div class="note"><strong>模型几乎没动</strong>最大 KL 只有 <code>0.000425</code>，它基本贴着 SFT 策略在走。</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>为什么不是彻底失败</h2>
+      <p>旧版 SFT+GRPO v1 的问题是短输出坍塌：少报 turn，保住 precision，牺牲 recall。当前 <code>speech_v2</code> 已经修住了这个失败模式。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>诊断项</th><th>旧失败 SFT+GRPO v1</th><th>当前 speech SFT+GRPO</th></tr></thead>
+          <tbody>
+            <tr><td>平均预测 turns</td><td>约 1.98</td><td>3.98</td></tr>
+            <tr><td>平均参考 turns</td><td>约 4.00</td><td>4.00</td></tr>
+            <tr><td>Turn Recall</td><td class="neg">46.50</td><td class="pos">91.00</td></tr>
+            <tr><td>复读问题</td><td>通过缩短输出缓解</td><td>没有坍塌</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>所以，小增益不是因为 GRPO 把模型带歪，而是 revised reward 成功守住了 SFT 行为，却主要只找到了很小的局部改进。</p>
+    </section>
+
+    <section>
+      <h2>真正教训</h2>
+      <h3>1. 当前设置接近局部天花板，不是理论天花板</h3>
+      <p>SFT 已经有 <code>100/100</code> 有效解析，平均预测 turns 是 <code>3.97</code>，参考均值是 <code>4.00</code>；SFT+GRPO 是 <code>3.98</code>。粗结构已经解决。</p>
+      <p>但 HarperValley 没有被真正做满：Temporal IoU 仍只有 <code>69.71</code>，WER 仍有 <code>8.15</code>，并且 <code>hvb_0015</code>、<code>hvb_0009</code>、<code>hvb_0080</code> 等样本仍有明显提升空间。</p>
+
+      <h3>2. 下游任务需要不同数据和奖励</h3>
+      <p>MMAU/MMSU 看的是 caption 是否保留问答所需的信息；HarperValley GRPO 奖励优化的是 who、what、when 的 speech-turn skeleton。两个目标并不等价。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>探针</th><th>SFT</th><th>SFT+GRPO</th><th>变化</th></tr></thead>
+          <tbody>
+            <tr><td>MMAU speech</td><td>156/333</td><td>155/333</td><td class="neg">-1</td></tr>
+            <tr><td>MMSU split</td><td>196/500</td><td>195/500</td><td class="neg">-1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>探针</th><th>SFT coverage</th><th>SFT+GRPO coverage</th></tr></thead>
+          <tbody>
+            <tr><td>MMAU speech</td><td>60.06%</td><td class="neg">59.46%</td></tr>
+            <tr><td>MMSU split</td><td>56.00%</td><td class="neg">55.60%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3. 任务形式限制了 GRPO 的发挥</h3>
+      <p>speech-only HarperValley 更像“结构化转写 + 时间戳”。目标确定、语法明确、SFT 很擅长。GRPO 更适合有多种有效输出、reward 能表达偏好的任务。</p>
+      <div class="table-wrap">
+        <table class="text-table">
+          <thead><tr><th>任务形式</th><th>为什么更适合 GRPO</th></tr></thead>
+          <tbody>
+            <tr><td>TACOS event caption + semantic Event-F1</td><td>事件描述有多种正确说法，reward 可以偏好时间匹配的语义事件。</td></tr>
+            <tr><td>Caption-QA preservation reward</td><td>直接优化下游问答可用性，而不是只优化 turn skeleton。</td></tr>
+            <tr><td>Temporal error correction / preference pairs</td><td>可以直接惩罚漏事件、顺序错、时间戳交换。</td></tr>
+            <tr><td>coverage + concision 多目标 captioning</td><td>reward 可以显式平衡“信息足够”和“不要冗长”。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>四个假设的直接回答</h2>
+      <div class="table-wrap">
+        <table class="text-table">
+          <thead><tr><th>假设</th><th>判断</th><th>原因</th></tr></thead>
+          <tbody>
+            <tr><td>已经训练到头/达到天花板</td><td><span class="tag">部分成立</span></td><td>当前数据和 speech-only contract 接近局部天花板；但 IoU/WER 仍有空间。</td></tr>
+            <tr><td>SFT+GRPO 需要不同的数据</td><td><span class="tag">对迁移成立</span></td><td>当前 GRPO 优化 HarperValley skeleton，不优化 MMAU/MMSU 的 QA 可用性。</td></tr>
+            <tr><td>80 steps 不够</td><td><span class="tag">不是主因</span></td><td>reward 很早就高，KL 极小，reward variance 没塌，LR 已经衰减到接近 0。</td></tr>
+            <tr><td>当前任务提升有限，换任务形式可能提升</td><td><span class="tag">很可能成立</span></td><td>结构化 speech-turn extraction 对 SFT 太友好；开放事件 caption 或 QA 保真更可能放大 GRPO。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>下一步怎么做</h2>
+      <ol>
+        <li><strong>先做 checkpoint sweep。</strong>评估 <code>checkpoint-20</code>、<code>checkpoint-40</code>、<code>checkpoint-60</code>、<code>checkpoint-80</code> 的 HarperValley，再决定是否加训。</li>
+        <li><strong>做 reward/data ablation，而不是只做 longer run。</strong>保留当前 SFT init，对比短 GRPO、慢 LR decay、timestamp-focused reward、QA-preservation reward/data。</li>
+        <li><strong>如果需要强 GRPO 故事，换任务形式。</strong>优先尝试 TACOS semantic Event-F1、caption-QA、temporal ordering correction 或开放 wording 下的事件覆盖任务。</li>
+      </ol>
+      <div class="table-wrap">
+        <table class="text-table">
+          <thead><tr><th>Run</th><th>改动</th><th>目标</th></tr></thead>
+          <tbody>
+            <tr><td>A</td><td><code>MAX_STEPS=40</code></td><td>看短 GRPO 是否已经吃掉主要收益。</td></tr>
+            <tr><td>B</td><td><code>MAX_STEPS=120</code>，更慢 LR decay</td><td>检验“步数不够”假设。</td></tr>
+            <tr><td>C</td><td>加重 timestamp-focused reward</td><td>看剩余 headroom 是否主要在 Temporal IoU。</td></tr>
+            <tr><td>D</td><td>混入 QA-preservation reward/data</td><td>直接测试下游迁移，而不只看 HarperValley。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bottom-line">
+      <h2>底线</h2>
+      <p>不要把这次结果讲成“GRPO 没用”。更准确的说法是：对这个 SFT checkpoint、这批 HarperValley 数据、这个确定性 speech-turn skeleton 任务来说，GRPO 的边际效用有限。它没有救火，因为 SFT 已经不需要被救；它也没有突破，因为当前 reward 没给它足够新的优化方向。</p>
+    </section>
+
+    <section>
+      <h2>证据文件</h2>
+      <ul class="evidence">
+        <li><code>exp/sft_harpervalley_speech_v1/metrics.json</code></li>
+        <li><code>exp/sft+grpo_harpervalley_speech_v1/metrics.json</code></li>
+        <li><code>/data3/fwh/temporal-audio-caption/sft+grpo_harpervalley_speech_v1/checkpoint-80/trainer_state.json</code></li>
+        <li><code>/data3/fwh/temporal-audio-caption/sft+grpo_harpervalley_speech_v1/train_metrics.json</code></li>
+        <li><code>exp/sft_harpervalley_speech_v1/eval/sft_grpo/qa/mmau_speech_sft_grpo_results.summary.json</code></li>
+        <li><code>exp/sft_harpervalley_speech_v1/eval/sft_grpo/qa/mmsu_sft_grpo_results.summary.json</code></li>
+      </ul>
+    </section>
+  </div>
+</main>
+</body>
+</html>

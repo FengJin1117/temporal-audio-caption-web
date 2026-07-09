@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>avqa-100</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172026;
+      --muted: #60707a;
+      --line: #d9e2e6;
+      --panel: #f7faf9;
+      --paper: #ffffff;
+      --accent: #1f7a62;
+      --accent-2: #be5a38;
+      --soft: #e8f2ee;
+      --warn: #fff3df;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background: #eef4f2;
+      line-height: 1.55;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 28px 56px;
+    }
+    .hero {
+      min-height: 360px;
+      padding: 44px 44px 34px;
+      background:
+        linear-gradient(125deg, rgba(23, 32, 38, 0.88), rgba(31, 122, 98, 0.76)),
+        url("audio/avocado_avqa_000001.wav");
+      background-color: #22342f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-bottom: 6px solid #94c9b7;
+    }
+    .home-link {
+      display: inline-flex;
+      width: max-content;
+      margin-bottom: 22px;
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,.58);
+    }
+    .home-link:hover {
+      border-bottom-color: #fff;
+    }
+    .eyebrow {
+      margin: 0 0 14px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #d6eee6;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0;
+      max-width: 850px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+    .hero p {
+      max-width: 780px;
+      margin: 22px 0 0;
+      font-size: 18px;
+      color: #edf7f3;
+    }
+    .hero-foot {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 40px;
+    }
+    .chip {
+      border: 1px solid rgba(255,255,255,.35);
+      padding: 7px 11px;
+      font-size: 13px;
+      background: rgba(255,255,255,.1);
+    }
+    section {
+      margin-top: 28px;
+      padding: 30px 34px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    h2 {
+      margin: 0 0 18px;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 24px 0 10px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    p { margin: 0 0 12px; }
+    .muted { color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .metric {
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      min-height: 108px;
+    }
+    .metric .value {
+      display: block;
+      font-size: 30px;
+      font-weight: 760;
+      line-height: 1.1;
+      color: var(--accent);
+    }
+    .metric .label {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .two {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 22px;
+      align-items: start;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px 9px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: #33444d;
+      background: #f2f6f5;
+      font-weight: 700;
+    }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .bar-list { display: grid; gap: 10px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 118px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+    .track {
+      height: 10px;
+      background: #e5ece9;
+      overflow: hidden;
+    }
+    .fill {
+      height: 100%;
+      background: var(--accent);
+    }
+    .formula {
+      padding: 14px 16px;
+      background: var(--soft);
+      border-left: 4px solid var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .note {
+      padding: 14px 16px;
+      background: var(--warn);
+      border-left: 4px solid var(--accent-2);
+      color: #553928;
+    }
+    .example {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 20px;
+      margin-top: 16px;
+    }
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .mini {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 14px;
+    }
+    .mini ul {
+      margin: 8px 0 0;
+      padding-left: 19px;
+    }
+    .mini li { margin: 5px 0; }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border: 1px solid var(--line);
+      background: #eef3f1;
+      color: #43535b;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .92em;
+      background: #eef3f1;
+      padding: 1px 5px;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .step {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+      min-height: 122px;
+    }
+    .step strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--accent);
+    }
+    footer {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .page { padding: 18px 14px 36px; }
+      .hero { padding: 30px 24px; }
+      section { padding: 22px 18px; }
+      .grid, .two, .flow { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 96px 1fr 38px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <a class="home-link" href="../index.html">← 返回首页</a>
+        <p class="eyebrow">grpo_avocado_v1 / held-out event method benchmark</p>
+        <h1>avqa-100</h1>
+        <p>从 AVQA train split 冻结的 100 条永久 held-out 样本，用来验证“teacher caption → atomic evidence → reward reference”的事件拆解方法。后续更多模型可以在同一批音频和同一套 reference 上横向比较。</p>
+      </div>
+      <div class="hero-foot">
+        <span class="chip">目录：exp/grpo_avocado_v1/avqa_event_benchmark_100</span>
+        <span class="chip">seed：20260708</span>
+        <span class="chip">schema：avocado_evidence_v1</span>
+        <span class="chip">prompt：mmar_caption_simple_v1</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>当前快照</h2>
+      <div class="grid">
+        <div class="metric"><span class="value">100</span><span class="label">样本与导出 wav，缺失音频 0</span></div>
+        <div class="metric"><span class="value">476</span><span class="label">teacher reference evidence items</span></div>
+        <div class="metric"><span class="value">70</span><span class="label">relation groups，用于保留顺序、比较、重叠等关系</span></div>
+        <div class="metric"><span class="value">0</span><span class="label">held-out leakage hit；AVQA 内部 file_name 重复剔除 183</span></div>
+      </div>
+      <p class="muted" style="margin-top:14px">Teacher 使用 <code>Qwen/Qwen3-Omni-30B-A3B-Captioner</code> 生成 raw caption；parser 使用离线文本 LLM，只读 caption，不接触音频。</p>
+    </section>
+
+    <section>
+      <h2>模型评测成绩</h2>
+      <div class="grid">
+        <div class="metric"><span class="value">30.95%</span><span class="label">Qwen2.5 Evidence Recall</span></div>
+        <div class="metric"><span class="value">12.75%</span><span class="label">Qwen2.5 Evidence Precision</span></div>
+        <div class="metric"><span class="value">17.50%</span><span class="label">Qwen2.5 Relation Recall</span></div>
+        <div class="metric"><span class="value">34.00%</span><span class="label">Qwen2.5 caption-QA score</span></div>
+        <div class="metric"><span class="value">37.02%</span><span class="label">Qwen3 Evidence Recall</span></div>
+        <div class="metric"><span class="value">17.90%</span><span class="label">Qwen3 Evidence Precision</span></div>
+        <div class="metric"><span class="value">26.50%</span><span class="label">Qwen3 Relation Recall</span></div>
+        <div class="metric"><span class="value">32.00%</span><span class="label">Qwen3 caption-QA score</span></div>
+      </div>
+      <table style="margin-top:18px">
+        <thead><tr><th>模型</th><th>评测方式</th><th class="num">Evidence R</th><th class="num">Evidence P</th><th class="num">Relation R</th><th class="num">QA score</th><th class="num">状态</th></tr></thead>
+        <tbody>
+          <tr><td>Qwen2.5-Omni-7B</td><td>caption → parser → evidence score；caption-QA</td><td class="num">30.95%</td><td class="num">12.75%</td><td class="num">17.50%</td><td class="num">34.00%</td><td class="num">完成</td></tr>
+          <tr><td>Qwen3-Omni-30B-A3B-Instruct</td><td>caption → parser → evidence score；caption-QA</td><td class="num">37.02%</td><td class="num">17.90%</td><td class="num">26.50%</td><td class="num">32.00%</td><td class="num">完成</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin-top:12px">所有模型按同一口径评测：先生成 caption，再用 text parser 做 evidence 拆解，并用 caption-QA 文本模型回答 AVQA 选择题。Qwen3 parser: ok 72 / review 28，parser error rows 2；Qwen3 caption-QA coverage 58.00%，answered accuracy 55.17%。</p>
+    </section>
+
+    <section>
+      <h2>数据统计</h2>
+      <div class="two">
+        <div>
+          <table>
+            <tbody>
+              <tr><th>来源</th><td>AVQA processed train split；不使用 val</td></tr>
+              <tr><th>候选样本</th><td>40,242</td></tr>
+              <tr><th>采样策略</th><td>deterministic seed 20260708；按问题 bucket 轻量分层轮转</td></tr>
+              <tr><th>音频长度</th><td>min 8.99s / median 10.01s / max 10.02s / mean 9.97s</td></tr>
+              <tr><th>答案分布</th><td>A 33, B 21, C 28, D 18</td></tr>
+              <tr><th>reference QC</th><td>ok 49 / review 51；review 只打标，不删除 raw</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3>问题 bucket 分布</h3>
+          <div class="bar-list">
+            <div class="bar-row"><span>count</span><span class="track"><span class="fill" style="width:100%"></span></span><span>10</span></div>
+            <div class="bar-row"><span>event</span><span class="track"><span class="fill" style="width:100%"></span></span><span>10</span></div>
+            <div class="bar-row"><span>weather</span><span class="track"><span class="fill" style="width:100%"></span></span><span>10</span></div>
+            <div class="bar-row"><span>animal</span><span class="track"><span class="fill" style="width:90%"></span></span><span>9</span></div>
+            <div class="bar-row"><span>people_action</span><span class="track"><span class="fill" style="width:90%"></span></span><span>9</span></div>
+            <div class="bar-row"><span>place</span><span class="track"><span class="fill" style="width:90%"></span></span><span>9</span></div>
+            <div class="bar-row"><span>sound_source</span><span class="track"><span class="fill" style="width:90%"></span></span><span>9</span></div>
+            <div class="bar-row"><span>other stems</span><span class="track"><span class="fill" style="width:100%"></span></span><span>34</span></div>
+          </div>
+        </div>
+      </div>
+      <h3>Evidence type 分布</h3>
+      <table>
+        <thead><tr><th>type</th><th class="num">数量</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>sound_event</td><td class="num">263</td><td>可听事件或主要声源</td></tr>
+          <tr><td>attribute</td><td class="num">88</td><td>强弱、节奏、持续性、远近等属性</td></tr>
+          <tr><td>speech</td><td class="num">47</td><td>人声、说话、喊叫、交互</td></tr>
+          <tr><td>uncertainty</td><td class="num">38</td><td>caption 中保留的不确定性</td></tr>
+          <tr><td>scene</td><td class="num">26</td><td>仅由声音支持的场景线索</td></tr>
+          <tr><td>count/music/order/comparison</td><td class="num">14</td><td>数量、音乐、顺序、比较关系</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>两个代表样例</h2>
+      <p class="muted">下面展示的是 Qwen2.5-Omni-7B baseline：同一条音频先有 teacher caption 和 reference evidence，再看 student caption 经同一 parser 后抽出的 evidence，以及单样本得分。</p>
+
+      <div class="example">
+        <h3>样例 1：主声源抓对，但细节混入错误</h3>
+        <p><span class="badge">id: avocado_avqa_000061</span><span class="badge">answer: D. frog</span><span class="badge">relation 命中</span></p>
+        <p><strong>问题：</strong>What are the main sources of sound in this audio? A bird / B cricket / C Giant salamander / D frog</p>
+        <div class="example-grid">
+          <div class="mini">
+            <strong>Teacher caption 摘要</strong>
+            <p>夜间自然环境中有高音、节奏性、断续的两栖动物叫声；随后出现更低沉、喉音更重、结构更复杂的蛙叫。背景几乎安静，只有轻微高频 hiss。</p>
+            <strong>Reference evidence</strong>
+            <ul>
+              <li>sound_event: high-pitched, rhythmic, staccato call</li>
+              <li>sound_event: guttural, resonant lower-pitch call</li>
+              <li>attribute: first call is sharp, clear, reedy, percussive</li>
+              <li>attribute: second call is moist, throaty, low-mid rich</li>
+              <li>sound_event: faint continuous high-frequency hiss</li>
+            </ul>
+            <p><strong>Relation:</strong> first call high-pitched/staccato vs second call lower-pitched/guttural/more complex.</p>
+            <p><strong>QC:</strong> ok；evidence 5；relation 1；low confidence 0。</p>
+          </div>
+          <div class="mini">
+            <strong>Qwen2.5 caption</strong>
+            <p>The audio features a series of distinct sounds, starting with a frog croaking loudly, followed by another frog croaking in a higher pitch, then a bird chirping. The background is filled with crickets chirping.</p>
+            <strong>Parsed student evidence</strong>
+            <ul>
+              <li>sound_event: frog croaks loudly at the beginning</li>
+              <li>sound_event: second frog croaks in a higher pitch</li>
+              <li>sound_event: bird chirps</li>
+              <li>sound_event: cricket chirping in the background</li>
+            </ul>
+            <p><strong>Relation:</strong> frog first → higher-pitched frog → bird; cricket in background.</p>
+            <p><strong>QC:</strong> ok；evidence 4；relation 1。</p>
+          </div>
+        </div>
+        <p class="formula">Single-sample score: Evidence Recall 20.00% · Evidence Precision 25.00% · Relation Recall 100.00% · Format Pass true</p>
+        <p class="muted">讲解点：模型抓到了 frog，也构造了顺序关系，所以 relation recall 可以命中；但 bird/cricket 是额外混入，且 teacher 的声学属性细节大多没召回。</p>
+      </div>
+
+      <div class="example">
+        <h3>样例 2：重复输出导致 parser failure</h3>
+        <p><span class="badge">id: avocado_avqa_000052</span><span class="badge">answer: A. It's Hailing</span><span class="badge">QC review</span></p>
+        <p><strong>问题：</strong>What's the weather in the audio? A It's Hailing / B a sunny day / C rain / D snowy day</p>
+        <div class="example-grid">
+          <div class="mini">
+            <strong>Teacher caption 摘要</strong>
+            <p>音频以强烈、包围感很强的 rushing water / waterfall / rapids 声开始，低频轰鸣和中高频水花、气泡、汩汩声占主导；背景中有俄语人声，但被水声部分遮蔽。teacher 明确指出仅凭音频不能可靠判断天气。</p>
+            <strong>Reference evidence</strong>
+            <ul>
+              <li>sound_event: roaring rushing water with low-frequency rumble and splashes/gurgles</li>
+              <li>sound_event: intense immersive water sounds indicate high-energy environment</li>
+              <li>speech: Russian voice partially masked by water</li>
+              <li>uncertainty: exact weather cannot be determined from audio alone</li>
+            </ul>
+            <p><strong>Relation:</strong> water dominates; speech is faint and partially masked.</p>
+            <p><strong>QC:</strong> review；flag: possible_unsupported_identity_or_scene；evidence 4；relation 1。</p>
+          </div>
+          <div class="mini">
+            <strong>Qwen2.5 caption</strong>
+            <p>The audio features a man speaking in Spanish, saying “no no no ...” repeatedly; raw output continues repeating <code>no</code> until max token length.</p>
+            <strong>Parsed student evidence</strong>
+            <ul>
+              <li>none</li>
+            </ul>
+            <p><strong>Relation:</strong> none</p>
+            <p><strong>QC:</strong> review；flags: caption_high_repetition, json_decode:Unterminated string starting at, missing_json_object, possible_unsupported_identity_or_scene, too_few_evidence_items。</p>
+          </div>
+        </div>
+        <p class="formula">Single-sample score: Evidence Recall 0.00% · Evidence Precision 0.00% · Relation Recall 0.00% · Format Pass true</p>
+        <p class="muted">讲解点：reference 结构能表达“水声主导、语音被遮蔽、天气不可确定”；student 高重复输出让 parser 抽不出 evidence，因此该样本在 evidence 维度完全失败。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>指标定义与计算方式</h2>
+      <div class="two">
+        <div>
+          <h3>Evidence matching</h3>
+          <p>每条 student caption 先经过同一个 text parser，得到 predicted evidence。reference evidence 来自 teacher caption 的 parser 输出。每个 evidence item 用词集合 Jaccard 相似度打分，阈值为 0.25，按分数从高到低 greedy 一对一匹配。</p>
+          <p class="formula">Evidence Recall = matched_reference_items / reference_items<br>Evidence Precision = matched_predicted_items / predicted_items</p>
+          <h3>Relation recall</h3>
+          <p>relation group 记录顺序、比较、重叠、因果、数量等跨 item 关系；同样用文本相似度匹配，阈值为 0.20。</p>
+          <p class="formula">Relation Recall = matched_reference_relation_groups / reference_relation_groups</p>
+        </div>
+        <div>
+          <h3>Format pass</h3>
+          <p>caption benchmark 不强制 answer tag；这里检查输出是否为非空自然语言 caption，且没有破坏性的 JSON 或不配对的 answer tag。</p>
+          <h3>AVQA caption-QA</h3>
+          <p>把 student caption、AVQA question 和 4 个 choices 输入文本 QA 模型，要求返回 <code>{"answer":"A"}</code> 或 abstain reason。score 以 100 条为分母，未回答计 0。</p>
+          <p class="formula">QA score = correct / total<br>Coverage = answered / total<br>Answered Accuracy = correct / answered<br>Wrong-answer Rate = wrong_answered / total</p>
+        </div>
+      </div>
+      <p class="note">这些指标不是最终训练 reward 本身，而是用于快速判断“事件拆解 reference 是否能区分模型 caption 能力”。raw outputs、parser raw 和 QC flags 全部保留，失败样本仍在分母中。</p>
+    </section>
+
+    <section>
+      <h2>实现方式</h2>
+      <div class="flow">
+        <div class="step"><strong>1. 构建样本</strong>用 <code>load_from_disk</code> + <code>Audio(decode=False)</code> 读取 AVQA，不触发音频解码；从 <code>audio["bytes"]</code> 导出 wav。</div>
+        <div class="step"><strong>2. 防泄漏</strong>读取现有 held-out manifests，汇总 <code>file_name</code>、<code>audio_sha256</code>、stem 等 blacklist；命中即剔除。</div>
+        <div class="step"><strong>3. Teacher caption</strong>Qwen3-Omni Captioner 生成 100 条 raw caption；prompt 记录为 <code>mmar_caption_simple_v1</code>，不手改输出。</div>
+        <div class="step"><strong>4. Evidence parser</strong>离线 text parser 只读 caption，输出 <code>evidence_items</code>、<code>relation_groups</code> 和 QC。</div>
+        <div class="step"><strong>5. 模型评测</strong>新模型在同一 <code>inference_manifest</code> 上生成 caption，再复用 parser 与 scorer 计算横向指标。</div>
+      </div>
+      <h3>关键文件</h3>
+      <table>
+        <tbody>
+          <tr><th><code>source_manifest.jsonl</code></th><td>100 条冻结样本，含 AVQA 问题、choices、答案、音频 hash 和 wav 路径。</td></tr>
+          <tr><th><code>reward_references.jsonl</code></th><td>teacher caption + evidence items + relation groups + QC，schema version 为 <code>avocado_evidence_v1</code>。</td></tr>
+          <tr><th><code>student_* baseline</code></th><td>当前 Qwen2.5-Omni-7B 的 caption、parser、score 和 QA 结果。</td></tr>
+          <tr><th><code>README.md</code></th><td>给后续对话和更多模型使用的操作说明；新模型建议放到 <code>runs/&lt;model_name&gt;/</code>。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      生成日期：2026-07-08。展示页为 standalone HTML；详细 raw artifacts 以同目录 JSON/JSONL 为准。
+    </footer>
+  </main>
+</body>
+</html>
