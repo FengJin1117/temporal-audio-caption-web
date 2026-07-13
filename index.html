@@ -18,6 +18,8 @@
       --cyan-soft:#eaf6f8;
       --green:#22765b;
       --green-soft:#eef8f3;
+      --coral:#a84734;
+      --coral-soft:#fff1ed;
       --amber:#946200;
       --amber-soft:#fff8e8;
       --violet:#6b4fd3;
@@ -57,6 +59,7 @@
     .section { margin-top:18px; padding:28px; }
     .section.speech { background:linear-gradient(135deg, var(--cyan-soft), #fff 58%); }
     .section.avocado { background:linear-gradient(135deg,#effaf3,#fff 62%); }
+    .section.acorn { background:linear-gradient(135deg, var(--coral-soft), #fff 62%); }
     .section.benchmark { background:linear-gradient(135deg, var(--violet-soft), #fff 58%); }
     .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:18px; }
     .section-head p { max-width:620px; margin:0; color:var(--muted); }
@@ -65,6 +68,8 @@
     .nav-card.highlight { border-color:#b8dce5; background:#f8fdfe; }
     .reserved-links { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
     .reserved-links span { display:inline-flex; padding:8px 12px; border-radius:999px; border:1px dashed #b9d5c4; background:#f8fcfa; color:#6a7d72; font-weight:750; font-size:.92rem; }
+    .acorn .nav-card { border-color:#efd0c8; background:rgba(255,255,255,.82); }
+    .acorn .reserved-links span { border-color:#e5b5aa; background:#fff7f4; color:var(--coral); }
     .nav-title { display:block; margin-bottom:8px; color:var(--ink); font-size:1.15rem; font-weight:800; }
     .nav-desc { margin:0 0 16px; color:var(--muted); font-size:.93rem; }
     .subnav { display:flex; flex-wrap:wrap; gap:9px; }
@@ -312,6 +317,39 @@ Write one information-dense paragraph of about 120-180 words when the clip has e
     </section>
   </section>
 
+  <section class="section acorn" aria-labelledby="acorn-title">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Linearization &amp; Implicit Priority</p>
+        <h2 id="acorn-title">ACORN: Audio Caption Ordering with Reinforcement Learning</h2>
+      </div>
+      <p>自然语言必须将原本并行发生的事件和属性线性化；一旦完成 linearization，就会引入 implicit priority，从而影响读者或模型对事件的理解。</p>
+    </div>
+    <div class="nav-grid" aria-label="ACORN 待建设模块">
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">Benchmark</span>
+          <p class="nav-desc">评估线性表达中的顺序选择与隐式优先级影响。</p>
+        </div>
+        <div class="reserved-links"><span>待补充</span></div>
+      </section>
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">数据集</span>
+          <p class="nav-desc">建设包含并行事件、属性及多种合理线性化方式的数据。</p>
+        </div>
+        <div class="reserved-links"><span>待补充</span></div>
+      </section>
+      <section class="nav-card">
+        <div>
+          <span class="nav-title">训练方案</span>
+          <p class="nav-desc">探索降低线性化偏置、保留并行关系的训练方法。</p>
+        </div>
+        <div class="reserved-links"><span>待补充</span></div>
+      </section>
+    </div>
+  </section>
+
   <section class="section benchmark" aria-labelledby="benchmark-title">
     <div class="section-head">
       <div>
@@ -342,7 +380,7 @@ Write one information-dense paragraph of about 120-180 words when the clip has e
           </div>
         </div>
         <div class="benchmark-box">
-          <strong class="benchmark-box-title">avqa-100</strong>
+          <strong class="benchmark-box-title">AVQA-100</strong>
           <p class="benchmark-box-desc">AVQA train split 冻结的 100 条 held-out 样本：teacher caption → atomic evidence → reward reference 的事件拆解 benchmark。</p>
           <div class="subnav">
             <a href="caption_benchmark/BENCHMARK_OVERVIEW.html">Benchmark Overview</a>
