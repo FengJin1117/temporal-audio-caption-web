@@ -70,6 +70,10 @@
     .reserved-links span { display:inline-flex; padding:8px 12px; border-radius:999px; border:1px dashed #b9d5c4; background:#f8fcfa; color:#6a7d72; font-weight:750; font-size:.92rem; }
     .acorn .nav-card { border-color:#efd0c8; background:rgba(255,255,255,.82); }
     .acorn .reserved-links span { border-color:#e5b5aa; background:#fff7f4; color:var(--coral); }
+    .acorn-benchmark-preview { margin:0 0 18px; overflow:hidden; border:1px solid #e5b5aa; border-radius:18px; background:#fff; box-shadow:0 12px 30px rgba(168,71,52,.08); }
+    .acorn-benchmark-preview img { display:block; width:100%; height:auto; }
+    .acorn-benchmark-preview figcaption { padding:11px 14px; border-top:1px solid #efd0c8; color:var(--muted); font-size:.9rem; }
+    .acorn-benchmark-preview strong { color:var(--coral); }
     .nav-title { display:block; margin-bottom:8px; color:var(--ink); font-size:1.15rem; font-weight:800; }
     .nav-desc { margin:0 0 16px; color:var(--muted); font-size:.93rem; }
     .subnav { display:flex; flex-wrap:wrap; gap:9px; }
@@ -325,13 +329,17 @@ Write one information-dense paragraph of about 120-180 words when the clip has e
       </div>
       <p>自然语言必须将原本并行发生的事件和属性线性化；一旦完成 linearization，就会引入 implicit priority，从而影响读者或模型对事件的理解。</p>
     </div>
+    <figure class="acorn-benchmark-preview">
+      <img src="acorn/acorn-benchmark.png" alt="ACORN Benchmark 原型图" width="1536" height="1024" loading="lazy">
+      <figcaption><strong>Benchmark 原型</strong> · 当前图片用于展示初步构想，后续将替换为正式版本。</figcaption>
+    </figure>
     <div class="nav-grid" aria-label="ACORN 待建设模块">
       <section class="nav-card">
         <div>
           <span class="nav-title">Benchmark</span>
-          <p class="nav-desc">评估线性表达中的顺序选择与隐式优先级影响。</p>
+          <p class="nav-desc">评估线性表达中的顺序选择与隐式优先级影响，当前已有初步原型。</p>
         </div>
-        <div class="reserved-links"><span>待补充</span></div>
+        <div class="reserved-links"><span>原型展示中</span></div>
       </section>
       <section class="nav-card">
         <div>
